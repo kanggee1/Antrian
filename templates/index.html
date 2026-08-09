@@ -6,18 +6,11 @@
     <title>Kirim File Cetak - Professional Print Shop</title>
     <script src="https://cdn.tailwindcss.com"></script>
   </head>
-  <body
-    class="bg-slate-50 flex flex-col items-center justify-center min-h-screen p-4"
-  >
-    <div
-      class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border border-slate-100"
-    >
+  <body class="bg-slate-50 flex flex-col items-center justify-center min-h-screen p-4">
+    <div class="bg-white p-6 md:p-8 rounded-2xl shadow-xl w-full max-w-md border border-slate-100 flex-grow-0">
       <div class="text-center mb-6">
-        <span
-          class="bg-blue-100 text-blue-700 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider"
-          >Self-Service Print</span
-        >
-        <h2 class="text-2xl font-black text-slate-800 mt-2">
+        <span class="bg-blue-100 text-blue-700 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Self-Service Print</span>
+        <h2 class="text-xl md:text-2xl font-black text-slate-800 mt-2">
           Form Antrian Cetak
         </h2>
         <p class="text-slate-500 text-sm mt-1">
@@ -25,65 +18,35 @@
         </p>
       </div>
 
-      <form
-        action="/api/submit"
-        method="POST"
-        enctype="multipart/form-data"
-        class="space-y-5"
-      >
+      <form action="/api/submit" method="POST" enctype="multipart/form-data" class="space-y-5">
         <div>
-          <label
-            class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1"
-            >Nama Lengkap</label
-          >
-          <input
-            type="text"
-            name="nama"
-            required
-            placeholder="Masukkan nama Anda"
-            class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white transition text-sm"
-          />
+          <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Nama Lengkap</label>
+          <input type="text" name="nama" required placeholder="Masukkan nama Anda"
+            class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white transition text-sm" />
         </div>
 
         <div>
-          <label
-            class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1"
-            >Nomor Order</label
-          >
-          <input
-            type="text"
-            name="no_order"
-            required
-            placeholder="Contoh: 123..."
-            class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white transition text-sm"
-          />
+          <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Nomor Order</label>
+          <input type="text" name="no_order" required placeholder="Contoh: 123..."
+            class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white transition text-sm" />
         </div>
 
         <div>
-          <label
-            class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1"
-            >Upload File (Bisa Pilih Banyak)</label
-          >
-          <input
-            type="file"
-            name="file_upload"
-            accept=".pdf, image/jpeg, image/png, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-            multiple
-            required
-            class="w-full text-xs text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition cursor-pointer border border-slate-200 rounded-xl bg-slate-50"
-          />
-          <p class="text-[11px] text-slate-400 mt-1">
-            Format: JPG, PNG, PDF, DOCX. Bisa pilih lebih dari 1 file.
-          </p>
+          <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Upload File (Bisa Pilih Banyak)</label>
+          <input type="file" name="file_upload" accept=".pdf, image/jpeg, image/png, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document" multiple required
+            class="w-full text-xs text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition cursor-pointer border border-slate-200 rounded-xl bg-slate-50" />
+          <p class="text-[11px] text-slate-400 mt-1">Format: JPG, PNG, PDF, DOCX.</p>
         </div>
 
-        <button
-          type="submit"
-          class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-200 transition duration-300 text-sm mt-2"
-        >
+        <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-200 transition duration-300 text-sm mt-2">
           Kirim ke Antrian
         </button>
       </form>
+    </div>
+    
+    <!-- Footer Credit -->
+    <div class="mt-8 text-center text-xs text-slate-400 font-medium tracking-wide">
+      Created by @egianshari
     </div>
   </body>
 </html>
