@@ -3,10 +3,12 @@ import time
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for, send_from_directory
 from werkzeug.utils import secure_filename
 
-app = Flask(__name__)
+# PERBAIKAN VERCEL 1: Flask akan otomatis membaca folder /tmp/uploads saat web meminta file dari /static/uploads
+app = Flask(__name__, static_folder='/tmp/uploads', static_url_path='/static/uploads')
 app.secret_key = 'kunci_rahasia_admin_percetakan'
 
-UPLOAD_FOLDER = 'static/uploads'
+# PERBAIKAN VERCEL 2: Pindahkan tempat direktori penyimpanan ke /tmp karena server Vercel bersifat Read-Only
+UPLOAD_FOLDER = '/tmp/uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
