@@ -1,0 +1,600 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Panel Admin - Professional Print Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+  </head>
+  <body
+    class="bg-slate-100 p-4 md:p-8 flex flex-col min-h-screen text-slate-800"
+  >
+    <div class="max-w-7xl mx-auto w-full flex-grow">
+      <!-- Header -->
+      <div
+        class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4"
+      >
+        <div>
+          <h1 class="text-2xl md:text-3xl font-black tracking-tight">
+            Dashboard Manajemen Cetak
+          </h1>
+          <p class="text-xs text-slate-500 mt-0.5">
+            Professional Print Shop POS & Queue Automation
+          </p>
+        </div>
+        <div class="flex items-center gap-3">
+          <a
+            href="/display"
+            target="_blank"
+            class="bg-purple-600 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-purple-700 shadow-md transition flex items-center gap-1.5"
+            >📺 Layar Display</a
+          >
+          <a
+            href="/logout"
+            onclick="return confirm('Yakin ingin keluar?');"
+            class="bg-red-500 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-red-600 shadow-md transition"
+            >Keluar (Logout)</a
+          >
+        </div>
+      </div>
+
+      <!-- Kartu Statistik -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div
+          class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between"
+        >
+          <div>
+            <p
+              class="text-xs font-bold text-slate-400 uppercase tracking-wider"
+            >
+              Antrian Menunggu
+            </p>
+            <h3
+              id="stat-menunggu"
+              class="text-3xl font-black text-blue-600 mt-1"
+            >
+              0
+            </h3>
+          </div>
+          <div
+            class="bg-blue-50 p-3 rounded-xl text-blue-600 text-xl font-bold"
+          >
+            📋
+          </div>
+        </div>
+        <div
+          class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between"
+        >
+          <div>
+            <p
+              class="text-xs font-bold text-slate-400 uppercase tracking-wider"
+            >
+              Pesanan Selesai
+            </p>
+            <h3
+              id="stat-selesai"
+              class="text-3xl font-black text-emerald-600 mt-1"
+            >
+              0
+            </h3>
+          </div>
+          <div
+            class="bg-emerald-50 p-3 rounded-xl text-emerald-600 text-xl font-bold"
+          >
+            ✅
+          </div>
+        </div>
+        <div
+          class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between"
+        >
+          <div>
+            <p
+              class="text-xs font-bold text-slate-400 uppercase tracking-wider"
+            >
+              Total Pesanan Diproses
+            </p>
+            <h3 id="stat-total" class="text-3xl font-black text-slate-700 mt-1">
+              0
+            </h3>
+          </div>
+          <div
+            class="bg-amber-50 p-3 rounded-xl text-amber-600 text-xl font-bold"
+          >
+            📊
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabs & Search -->
+      <div
+        class="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4 mb-4 border-b border-slate-200 pb-3"
+      >
+        <div class="flex space-x-2">
+          <button
+            onclick="switchTab('antrian')"
+            id="tab-antrian"
+            class="px-5 py-2.5 font-bold text-sm md:text-base border-b-2 border-blue-600 text-blue-600 focus:outline-none transition"
+          >
+            📋 Antrian Aktif
+          </button>
+          <button
+            onclick="switchTab('riwayat')"
+            id="tab-riwayat"
+            class="px-5 py-2.5 font-bold text-sm md:text-base border-b-2 border-transparent text-slate-400 hover:text-slate-600 focus:outline-none transition"
+          >
+            📜 Riwayat & Re-use
+          </button>
+        </div>
+        <div>
+          <input
+            type="text"
+            id="searchInput"
+            oninput="filterTables()"
+            placeholder="🔍 Cari nama atau no order..."
+            class="px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs md:text-sm focus:ring-2 focus:ring-blue-500 w-full md:w-64 shadow-sm"
+          />
+        </div>
+      </div>
+
+      <!-- Konten Tab Antrian -->
+      <div id="content-antrian" class="tab-content">
+        <div
+          class="bg-white rounded-2xl shadow-sm overflow-hidden border border-slate-200"
+        >
+          <div
+            class="bg-blue-600 px-6 py-4 flex justify-between items-center text-white"
+          >
+            <h2 class="text-base md:text-lg font-bold">Daftar Antrian Aktif</h2>
+          </div>
+          <div class="overflow-x-auto max-h-[500px] overflow-y-auto">
+            <table class="min-w-full divide-y divide-slate-100">
+              <thead class="bg-slate-50 sticky top-0 z-10">
+                <tr>
+                  <th
+                    class="px-4 py-3 text-left text-xs font-bold text-slate-400 uppercase"
+                  >
+                    No. Order
+                  </th>
+                  <th
+                    class="px-4 py-3 text-left text-xs font-bold text-slate-400 uppercase"
+                  >
+                    Nama Pelanggan
+                  </th>
+                  <th
+                    class="px-4 py-3 text-left text-xs font-bold text-slate-400 uppercase"
+                  >
+                    File & Dokumen
+                  </th>
+                  <th
+                    class="px-4 py-3 text-left text-xs font-bold text-slate-400 uppercase"
+                  >
+                    Aksi
+                  </th>
+                </tr>
+              </thead>
+              <tbody
+                id="queue-body"
+                class="bg-white divide-y divide-slate-100 text-sm"
+              ></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Konten Tab Riwayat -->
+      <div id="content-riwayat" class="tab-content hidden">
+        <div
+          class="bg-white rounded-2xl shadow-sm overflow-hidden border border-slate-200"
+        >
+          <div
+            class="bg-slate-700 px-6 py-4 flex justify-between items-center text-white"
+          >
+            <h2 class="text-base md:text-lg font-bold">
+              Riwayat Cetak & Re-use
+            </h2>
+          </div>
+          <div class="overflow-x-auto max-h-[500px] overflow-y-auto">
+            <table class="min-w-full divide-y divide-slate-100">
+              <thead class="bg-slate-50 sticky top-0 z-10">
+                <tr>
+                  <th
+                    class="px-4 py-3 text-left text-xs font-bold text-slate-400 uppercase"
+                  >
+                    No. Order
+                  </th>
+                  <th
+                    class="px-4 py-3 text-left text-xs font-bold text-slate-400 uppercase"
+                  >
+                    Nama Pelanggan
+                  </th>
+                  <th
+                    class="px-4 py-3 text-left text-xs font-bold text-slate-400 uppercase"
+                  >
+                    File & Dokumen
+                  </th>
+                  <th
+                    class="px-4 py-3 text-left text-xs font-bold text-slate-400 uppercase"
+                  >
+                    Status
+                  </th>
+                  <th
+                    class="px-4 py-3 text-left text-xs font-bold text-slate-400 uppercase"
+                  >
+                    Aksi
+                  </th>
+                </tr>
+              </thead>
+              <tbody
+                id="history-body"
+                class="bg-white divide-y divide-slate-100 text-sm"
+              ></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Editor -->
+    <div
+      id="editorModal"
+      class="hidden fixed inset-0 bg-slate-950 bg-opacity-75 flex items-center justify-center z-50 p-4 backdrop-blur-sm"
+    >
+      <div
+        class="bg-white w-full max-w-5xl h-[90vh] rounded-2xl p-6 flex flex-col shadow-2xl border border-slate-200"
+      >
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-lg md:text-xl font-bold text-slate-800">
+            Editor Tata Letak Cetak
+          </h3>
+        </div>
+
+        <div
+          class="flex-grow bg-slate-100 border-2 border-dashed border-slate-300 flex items-center justify-center overflow-auto rounded-xl relative"
+        >
+          <canvas id="collageCanvas"></canvas>
+        </div>
+
+        <div
+          class="mt-4 md:mt-6 flex flex-col md:flex-row justify-between items-center gap-3"
+        >
+          <p
+            id="editing-info"
+            class="text-slate-600 font-bold text-sm text-center md:text-left"
+          ></p>
+          <div class="flex flex-wrap gap-2 justify-center">
+            <button
+              onclick="tutupEditor()"
+              class="bg-slate-500 text-white px-4 py-2 rounded-xl text-xs md:text-sm font-bold hover:bg-slate-600 transition"
+            >
+              Tutup
+            </button>
+            <button
+              onclick="cetakLangsung()"
+              class="bg-blue-600 text-white px-5 py-2 rounded-xl text-xs md:text-sm font-bold hover:bg-blue-700 shadow-lg shadow-blue-200 transition flex items-center gap-2"
+            >
+              🖨️ Langsung Print & Selesai
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let canvas = new fabric.Canvas("collageCanvas");
+      let currentEditingId = null;
+      let globalQueueData = [];
+      let globalHistoryData = [];
+      let lastQueueLength = 0;
+      let activeTab = "antrian";
+
+      canvas.setWidth(800);
+      canvas.setHeight(560);
+      canvas.setBackgroundColor("#ffffff", canvas.renderAll.bind(canvas));
+
+      function playBeep() {
+        try {
+          const audioCtx = new (
+            window.AudioContext || window.webkitAudioContext
+          )();
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = "sine";
+          osc.frequency.setValueAtTime(587.33, audioCtx.currentTime);
+          gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start();
+          osc.stop(audioCtx.currentTime + 0.3);
+        } catch (e) {}
+      }
+
+      function switchTab(tabName) {
+        activeTab = tabName;
+        const btnAntrian = document.getElementById("tab-antrian");
+        const btnRiwayat = document.getElementById("tab-riwayat");
+        const contentAntrian = document.getElementById("content-antrian");
+        const contentRiwayat = document.getElementById("content-riwayat");
+
+        if (tabName === "antrian") {
+          btnAntrian.className =
+            "px-5 py-2.5 font-bold text-sm md:text-base border-b-2 border-blue-600 text-blue-600 focus:outline-none transition";
+          btnRiwayat.className =
+            "px-5 py-2.5 font-bold text-sm md:text-base border-b-2 border-transparent text-slate-400 hover:text-slate-600 focus:outline-none transition";
+          contentAntrian.classList.remove("hidden");
+          contentRiwayat.classList.add("hidden");
+        } else {
+          btnRiwayat.className =
+            "px-5 py-2.5 font-bold text-sm md:text-base border-b-2 border-blue-600 text-blue-600 focus:outline-none transition";
+          btnAntrian.className =
+            "px-5 py-2.5 font-bold text-sm md:text-base border-b-2 border-transparent text-slate-400 hover:text-slate-600 focus:outline-none transition";
+          contentRiwayat.classList.remove("hidden");
+          contentAntrian.classList.add("hidden");
+        }
+        filterTables();
+      }
+
+      function loadData() {
+        fetch("/api/queue")
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.length > lastQueueLength && lastQueueLength !== 0) {
+              playBeep();
+            }
+            lastQueueLength = data.length;
+            globalQueueData = data;
+            document.getElementById("stat-menunggu").innerText = data.length;
+            renderQueue(data);
+          });
+
+        fetch("/api/history")
+          .then((res) => res.json())
+          .then((data) => {
+            globalHistoryData = data;
+            document.getElementById("stat-selesai").innerText = data.filter(
+              (d) => d.status === "Selesai",
+            ).length;
+            document.getElementById("stat-total").innerText =
+              data.length + globalQueueData.length;
+            renderHistory(data);
+          });
+      }
+
+      function generateFileHTML(filenames) {
+        return filenames
+          .map((f) => {
+            let namaFilePendek = f.substring(13); // Memotong timestamp
+            return `
+                <div class="flex items-center gap-2 mb-1.5">
+                    <a href="/static/uploads/${f}" target="_blank" class="text-blue-600 hover:underline text-xs font-semibold truncate max-w-[150px] md:max-w-[200px]" title="Buka File">📄 ${namaFilePendek}</a>
+                    <a href="/download/${f}" class="bg-slate-200 text-slate-700 hover:bg-slate-300 hover:text-slate-900 px-2 py-0.5 rounded text-[10px] font-bold transition shadow-sm" title="Download File">Unduh ⬇️</a>
+                </div>
+                `;
+          })
+          .join("");
+      }
+
+      function renderQueue(data) {
+        const tbody = document.getElementById("queue-body");
+        tbody.innerHTML = "";
+        if (data.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="4" class="px-4 py-8 text-center text-slate-400 italic">Belum ada antrian aktif.</td></tr>`;
+          return;
+        }
+        data.forEach((item) => {
+          let filesHTML = generateFileHTML(item.filenames);
+
+          tbody.innerHTML += `
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="px-4 py-4"><span class="font-bold text-slate-900 text-base">${item.no_order}</span></td>
+                        <td class="px-4 py-4 text-slate-800 font-bold">${item.nama}</td>
+                        <td class="px-4 py-4">${filesHTML}</td>
+                        <td class="px-4 py-4 flex flex-col space-y-2">
+                            <button onclick="bukaEditor(${item.id})" class="bg-amber-500 text-white px-3 py-1.5 rounded-xl text-xs font-bold hover:bg-amber-600 text-center shadow-sm transition">Buka Editor & Print</button>
+                            <div class="flex space-x-2">
+                                <button onclick="updateStatus(${item.id}, 'Selesai')" class="w-1/2 bg-emerald-600 text-white px-2 py-1 rounded-lg text-xs font-bold hover:bg-emerald-700 transition">Selesai</button>
+                                <button onclick="updateStatus(${item.id}, 'Dilewati')" class="w-1/2 bg-slate-400 text-white px-2 py-1 rounded-lg text-xs font-bold hover:bg-slate-500 transition">Lewati</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+        });
+      }
+
+      function renderHistory(data) {
+        const tbody = document.getElementById("history-body");
+        tbody.innerHTML = "";
+        if (data.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="5" class="px-4 py-8 text-center text-slate-400 italic">Belum ada riwayat.</td></tr>`;
+          return;
+        }
+        data.forEach((item) => {
+          let color =
+            item.status === "Selesai"
+              ? "text-emerald-600 bg-emerald-50"
+              : "text-slate-400 bg-slate-50";
+          let filesHTML = generateFileHTML(item.filenames);
+
+          tbody.innerHTML += `
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="px-4 py-4 font-bold text-slate-900">${item.no_order}</td>
+                        <td class="px-4 py-4 font-bold text-slate-800">${item.nama}</td>
+                        <td class="px-4 py-4">${filesHTML}</td>
+                        <td class="px-4 py-4"><span class="px-2 py-1 rounded-md text-xs font-bold ${color}">${item.status}</span></td>
+                        <td class="px-4 py-4">
+                            <button onclick="updateStatus(${item.id}, 'Menunggu')" class="bg-blue-600 text-white px-3 py-1.5 rounded-xl text-xs font-bold hover:bg-blue-700 shadow-sm transition">🔄 Proses Ulang</button>
+                        </td>
+                    </tr>
+                `;
+        });
+      }
+
+      function filterTables() {
+        let keyword = document
+          .getElementById("searchInput")
+          .value.toLowerCase();
+        if (activeTab === "antrian") {
+          let filtered = globalQueueData.filter(
+            (i) =>
+              i.nama.toLowerCase().includes(keyword) ||
+              i.no_order.toLowerCase().includes(keyword),
+          );
+          renderQueue(filtered);
+        } else {
+          let filtered = globalHistoryData.filter(
+            (i) =>
+              i.nama.toLowerCase().includes(keyword) ||
+              i.no_order.toLowerCase().includes(keyword),
+          );
+          renderHistory(filtered);
+        }
+      }
+
+      setInterval(loadData, 3000);
+      loadData();
+
+      function updateStatus(id, status) {
+        fetch(`/api/update_status/${id}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: status }),
+        }).then(() => loadData());
+      }
+
+      function bukaEditor(id) {
+        currentEditingId = id;
+        const order =
+          globalQueueData.find((q) => q.id === id) ||
+          globalHistoryData.find((q) => q.id === id);
+        if (!order) return;
+
+        document.getElementById("editorModal").classList.remove("hidden");
+        document.getElementById("editing-info").innerText =
+          `NO. ORDER: ${order.no_order.toUpperCase()} — NAMA: ${order.nama.toUpperCase()}`;
+
+        canvas.clear();
+        canvas.setBackgroundColor("#ffffff", canvas.renderAll.bind(canvas));
+
+        order.filenames.forEach((filename, index) => {
+          if (filename.toLowerCase().match(/\.(jpg|jpeg|png)$/)) {
+            fabric.Image.fromURL("/static/uploads/" + filename, function (img) {
+              img.scaleToWidth(280);
+              img.set({ left: 50 + index * 40, top: 50 + index * 40 });
+              canvas.add(img);
+              canvas.renderAll();
+            });
+          }
+        });
+      }
+
+      function tutupEditor() {
+        document.getElementById("editorModal").classList.add("hidden");
+        currentEditingId = null;
+      }
+
+      // DESAIN CETAK PROFESIONAL
+      function cetakLangsung() {
+        const order =
+          globalQueueData.find((q) => q.id === currentEditingId) ||
+          globalHistoryData.find((q) => q.id === currentEditingId);
+        const dataURL = canvas.toDataURL({ format: "jpeg", quality: 1.0 });
+
+        const printWindow = window.open("", "_blank");
+        printWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Print Order - ${order.no_order}</title>
+                    <style>
+                        body { 
+                            margin: 0; 
+                            padding: 0; 
+                            background: #fff; 
+                            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+                        }
+                        .print-container { 
+                            width: 100%; 
+                            max-width: 210mm; /* Standar A4 width */
+                            margin: 0 auto; 
+                        }
+                        .print-header {
+                            display: flex;
+                            justify-content: space-between;
+                            align-items: center;
+                            padding: 15px 30px;
+                            margin-bottom: 25px;
+                            border-bottom: 3px solid #1e293b;
+                            background-color: #f8fafc;
+                        }
+                        .header-left .label, .header-right .label {
+                            font-size: 11px;
+                            color: #64748b;
+                            text-transform: uppercase;
+                            font-weight: 800;
+                            letter-spacing: 1px;
+                            margin-bottom: 4px;
+                        }
+                        .header-left .value {
+                            font-size: 26px;
+                            font-weight: 900;
+                            color: #0f172a;
+                        }
+                        .header-right {
+                            text-align: right;
+                        }
+                        .header-right .value {
+                            font-size: 20px;
+                            font-weight: 700;
+                            color: #334155;
+                        }
+                        .print-body {
+                            padding: 0 30px;
+                            text-align: center;
+                        }
+                        .print-body img {
+                            max-width: 100%;
+                            height: auto;
+                        }
+                        
+                        /* Pengaturan Khusus Saat Printer Berjalan */
+                        @media print {
+                            @page { margin: 0.5cm; }
+                            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                            .print-header { 
+                                background-color: #f1f5f9 !important; 
+                                border-bottom-color: #000 !important;
+                            }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="print-container">
+                        <!-- HEADER CETAK PROFESIONAL -->
+                        <div class="print-header">
+                            <div class="header-left">
+                                <div class="label">Nomor Order</div>
+                                <div class="value">${order.no_order.toUpperCase()}</div>
+                            </div>
+                            <div class="header-right">
+                                <div class="label">Nama</div>
+                                <div class="value">${order.nama.toUpperCase()}</div>
+                            </div>
+                        </div>
+
+                        <!-- GAMBAR HASIL EDITOR -->
+                        <div class="print-body">
+                            <img src="${dataURL}" onload="window.print(); window.close();" />
+                        </div>
+                    </div>
+                </body>
+                </html>
+            `);
+        printWindow.document.close();
+
+        // Otomatis pindah status ke Selesai
+        updateStatus(currentEditingId, "Selesai");
+        tutupEditor();
+      }
+    </script>
+  </body>
+</html>

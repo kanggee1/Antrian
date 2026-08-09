@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Display Antrian Publik</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body
+    class="bg-slate-900 text-white min-h-screen flex flex-col justify-between p-8"
+  >
+    <div class="text-center">
+      <h1 class="text-4xl font-black tracking-wider text-blue-400">
+        STATUS ANTRIAN CETAK
+      </h1>
+      <p class="text-gray-400 text-sm mt-1">
+        Silakan perhatikan nomor order Anda
+      </p>
+    </div>
+
+    <div
+      class="grid grid-cols-1 md:grid-cols-2 gap-8 my-auto max-w-5xl mx-auto w-full"
+    >
+      <!-- Sedang Diproses -->
+      <div
+        class="bg-slate-800 border-2 border-blue-500 p-8 rounded-2xl shadow-2xl text-center flex flex-col justify-center"
+      >
+        <h3
+          class="text-xl font-bold text-blue-400 uppercase tracking-widest mb-4"
+        >
+          Sedang Diproses
+        </h3>
+        <div
+          id="current-processing"
+          class="text-6xl font-black text-white tracking-widest my-4"
+        >
+          ---
+        </div>
+        <p id="current-name" class="text-gray-300 text-lg font-medium">
+          Menunggu Antrian...
+        </p>
+      </div>
+
+      <!-- Antrian Berikutnya -->
+      <div
+        class="bg-slate-800 border-2 border-slate-700 p-8 rounded-2xl shadow-2xl flex flex-col"
+      >
+        <h3
+          class="text-xl font-bold text-gray-400 uppercase tracking-widest mb-4 text-center"
+        >
+          Antrian Berikutnya
+        </h3>
+        <div
+          id="next-queue-list"
+          class="space-y-3 overflow-y-auto max-h-[250px]"
+        >
+          <!-- Diisi via JS -->
+        </div>
+      </div>
+    </div>
+
+    <div class="text-center text-xs text-gray-500 font-medium">
+      Credit by @egianshari
+    </div>
+
+    <script>
+      function loadDisplay() {
+        fetch("/api/queue")
+          .then((res) => res.json())
+          .then((data) => {
+            const procEl = document.getElementById("current-processing");
+            const nameEl = document.getElementById("current-name");
+            const nextListEl = document.getElementById("next-queue-list");
+
+            if (data.length > 0) {
+              // Yang paling atas adalah yang sedang diproses / utama
+              procEl.innerText = data[0].no_order;
+              nameEl.innerText = data[0].nama + " (" + data[0].ukuran + ")";
+
+              // Sisa antrian berikutnya
+              nextListEl.innerHTML = "";
+              if (data.length > 1) {
+                for (let i = 1; i < data.length; i++) {
+                  nextListEl.innerHTML += `
+                                <div class="bg-slate-700 p-3 rounded-xl flex justify-between items-center">
+                                    <span class="font-bold text-xl text-yellow-400">${data[i].no_order}</span>
+                                    <span class="text-gray-300 text-sm">${data[i].nama}</span>
+                                </div>
+                            `;
+                }
+              } else {
+                nextListEl.innerHTML = `<p class="text-center text-gray-500 italic mt-8">Tidak ada antrian berikutnya.</p>`;
+              }
+            } else {
+              procEl.innerText = "KOSONG";
+              nameEl.innerText = "Belum ada antrian masuk";
+              nextListEl.innerHTML = `<p class="text-center text-gray-500 italic mt-8">Antrian bersih.</p>`;
+            }
+          });
+      }
+
+      setInterval(loadDisplay, 3000);
+      loadDisplay();
+    </script>
+  </body>
+</html>
