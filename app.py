@@ -1,19 +1,50 @@
 import os
 import time
+import json
+import base64
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for, send_from_directory
 from werkzeug.utils import secure_filename
 
-# PERBAIKAN VERCEL 1: Flask akan otomatis membaca folder /tmp/uploads saat web meminta file dari /static/uploads
 app = Flask(__name__, static_folder='/tmp/uploads', static_url_path='/static/uploads')
 app.secret_key = 'kunci_rahasia_admin_percetakan'
 
-# PERBAIKAN VERCEL 2: Pindahkan tempat direktori penyimpanan ke /tmp karena server Vercel bersifat Read-Only
 UPLOAD_FOLDER = '/tmp/uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-db_antrian = []
-current_id = 1
+DB_FILE = '/tmp/db_antrian.json'
+
+def load_db():
+    if os.path.exists(DB_FILE):
+        try:
+            with open(DB_FILE, 'r') as f:
+                data = json.load(f)
+                return data.get('db_antrian', []), data.get('current_id', 1)
+        except:
+            pass
+    return [], 1
+
+def save_db(db_antrian, current_id):
+    try:
+        with open(DB_FILE, 'w') as f:
+            json.dump({'db_antrian': db_antrian, 'current_id': current_id}, f)
+    except:
+        pass
+
+def ensure_file_exists(filename):
+    file_path = os.path.join(UPLOAD_FOLDER, filename)
+    if not os.path.exists(file_path):
+        db_antrian, _ = load_db()
+        for order in db_antrian:
+            file_cache = order.get('file_cache', {})
+            if filename in file_cache:
+                try:
+                    file_bytes = base64.b64decode(file_cache[filename])
+                    with open(file_path, 'wb') as f:
+                        f.write(file_bytes)
+                    break
+                except:
+                    pass
 
 ADMIN_USERNAME = 'admin'
 ADMIN_PASSWORD = 'nabati123'
@@ -56,7 +87,7 @@ def display():
 
 @app.route('/api/submit', methods=['POST'])
 def submit_order():
-    global current_id
+    db_antrian, current_id = load_db()
     
     files = request.files.getlist('file_upload')
     nama = request.form.get('nama')
@@ -66,10 +97,21 @@ def submit_order():
         return "File kosong", 400
 
     saved_filenames = []
+    file_cache = {}
     for i, file in enumerate(files):
         if file and file.filename != '':
             filename = secure_filename(f"{int(time.time())}_{i}_{file.filename}")
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            file_bytes = file.read()
+            
+            # Simpan fisik ke folder /tmp/uploads
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            with open(file_path, 'wb') as f:
+                f.write(file_bytes)
+            
+            # Buat cadangan base64 untuk mengantisipasi reset serverless
+            b64_str = base64.b64encode(file_bytes).decode('utf-8')
+            file_cache[filename] = b64_str
+            
             saved_filenames.append(filename)
             
     order = {
@@ -77,11 +119,14 @@ def submit_order():
         'nama': nama,
         'no_order': no_order,
         'filenames': saved_filenames, 
+        'file_cache': file_cache,
         'status': 'Menunggu',
         'waktu': time.strftime("%Y-%m-%d %H:%M:%S")
     }
     db_antrian.append(order)
     current_id += 1
+    
+    save_db(db_antrian, current_id)
     
     return '''
     <script>
@@ -92,29 +137,43 @@ def submit_order():
 
 @app.route('/api/queue')
 def get_queue():
+    db_antrian, _ = load_db()
     menunggu = [q for q in db_antrian if q['status'] == 'Menunggu']
     return jsonify(menunggu)
 
 @app.route('/api/history')
 def get_history():
+    db_antrian, _ = load_db()
     riwayat = [q for q in db_antrian if q['status'] in ['Selesai', 'Dilewati']]
     return jsonify(riwayat)
 
 @app.route('/api/update_status/<int:order_id>', methods=['POST'])
 def update_status(order_id):
+    db_antrian, current_id = load_db()
     data = request.json
     status_baru = data.get('status')
     
+    updated = False
     for order in db_antrian:
         if order['id'] == order_id:
             order['status'] = status_baru
-            return jsonify({"success": True, "message": "Status diperbarui"})
+            updated = True
+            break
+            
+    if updated:
+        save_db(db_antrian, current_id)
+        return jsonify({"success": True, "message": "Status diperbarui"})
             
     return jsonify({"success": False, "message": "Order tidak ditemukan"}), 404
 
-# FITUR BARU: Route untuk mendownload file
+@app.route('/static/uploads/<filename>')
+def serve_uploaded_file(filename):
+    ensure_file_exists(filename)
+    return send_from_directory(UPLOAD_FOLDER, filename)
+
 @app.route('/download/<filename>')
 def download_file(filename):
+    ensure_file_exists(filename)
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename, as_attachment=True)
 
 if __name__ == '__main__':
