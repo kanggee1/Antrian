@@ -242,7 +242,6 @@
           }).join("");
       }
 
-      // Render Queue Table & Action Buttons Fix
       function renderQueue(data) {
         const tbody = document.getElementById("queue-body");
         tbody.innerHTML = "";
@@ -283,7 +282,10 @@
                 <td class="px-4 py-3">${generateFileHTML(item.filenames)}</td>
                 <td class="px-4 py-3"><span class="px-2 py-0.5 rounded-md text-[10px] font-bold border ${badgeColor}">${item.status}</span></td>
                 <td class="px-4 py-3 text-center">
-                    <button onclick="updateStatus(${item.id}, 'Menunggu')" class="bg-blue-600/20 hover:bg-blue-600/40 text-blue-300 border border-blue-500/30 px-3 py-1.5 rounded-lg text-xs font-bold transition">🔄 Proses Ulang</button>
+                    <div class="flex items-center justify-center gap-1.5">
+                        <button onclick="updateStatus(${item.id}, 'Menunggu')" class="bg-blue-600/20 hover:bg-blue-600/40 text-blue-300 border border-blue-500/30 px-3 py-1.5 rounded-lg text-xs font-bold transition">🔄 Proses Ulang</button>
+                        <button onclick="hapusRiwayat(${item.id})" class="bg-rose-600/20 hover:bg-rose-600/40 text-rose-300 border border-rose-500/30 px-3 py-1.5 rounded-lg text-xs font-bold transition">🗑️ Hapus</button>
+                    </div>
                 </td>
             </tr>`;
         });
@@ -309,6 +311,21 @@
             loadData();
           }
         });
+      }
+
+      function hapusRiwayat(id) {
+        if (confirm("Peringatan: Yakin ingin menghapus data riwayat ini beserta file dokumen aslinya secara permanen?")) {
+          fetch(`/api/delete/${id}`, {
+            method: "DELETE",
+          }).then((res) => res.json()).then((res) => {
+            if (res.success) {
+              showToast("🗑️ " + res.message);
+              loadData();
+            } else {
+              alert("Gagal menghapus data.");
+            }
+          });
+        }
       }
 
       setInterval(loadData, 4000);
@@ -419,6 +436,7 @@
         document.getElementById('btn-batal-potong').classList.add('hidden');
       }
 
+      // --- PERBAIKAN BUKA EDITOR (Cross-Origin Fix) ---
       function bukaEditor(id) {
         currentEditingId = id;
         resetPotongUI();
@@ -433,12 +451,13 @@
 
         order.filenames.forEach((filename, index) => {
           if (filename.toLowerCase().match(/\.(jpg|jpeg|png)$/)) {
+            // Ditambahkan crossOrigin: 'anonymous' agar tidak diblokir browser saat diubah ke cetak
             fabric.Image.fromURL("/static/uploads/" + filename, function (img) {
               img.scaleToWidth(300);
               img.set({ left: 40 + (index * 25), top: 40 + (index * 25) });
               canvas.add(img);
               canvas.renderAll();
-            });
+            }, { crossOrigin: 'anonymous' });
           }
         });
       }
@@ -449,46 +468,91 @@
         batalPotong();
       }
 
+      // --- PERBAIKAN CETAK LANGSUNG (Header Kiri Atas Professional & Delay Render) ---
       function cetakLangsung() {
         const order = globalQueueData.find((q) => q.id === currentEditingId) || globalHistoryData.find((q) => q.id === currentEditingId);
         canvas.discardActiveObject(); 
         canvas.renderAll();
         
-        const dataURL = canvas.toDataURL({ format: "jpeg", quality: 1.0 });
-        const printWindow = window.open("", "_blank");
-        
-        printWindow.document.write(`
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <title>Print Order - ${order.no_order}</title>
-                <style>
-                    body { margin: 0; padding: 0; background: #fff; font-family: Arial, sans-serif; }
-                    .print-container { width: 100%; max-width: 210mm; margin: 0 auto; padding: 10mm; box-sizing: border-box; }
-                    .header { text-align: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #ddd; }
-                    .customer-name { font-size: 22px; font-weight: bold; margin: 0; }
-                    .order-num { font-size: 12px; color: #666; margin-top: 5px; }
-                    .print-body { text-align: center; }
-                    .print-body img { max-width: 100%; height: auto; }
-                    @media print { @page { margin: 0; } body { margin: 0.5cm; } }
-                </style>
-            </head>
-            <body>
-                <div class="print-container">
-                    <div class="header">
-                        <h1 class="customer-name">${order.nama.toUpperCase()}</h1>
-                        <div class="order-num">NO ORDER: ${order.no_order.toUpperCase()}</div>
+        try {
+            // Mengubah format ke PNG untuk kompatibilitas yang lebih baik
+            const dataURL = canvas.toDataURL({ format: "png", quality: 1.0 });
+            const printWindow = window.open("", "_blank");
+            
+            printWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Print Order - ${order.no_order}</title>
+                    <style>
+                        body { 
+                            margin: 0; padding: 0; background: #fff; 
+                            font-family: 'Segoe UI', Arial, sans-serif; 
+                        }
+                        .print-container { 
+                            width: 100%; max-width: 210mm; margin: 0 auto; 
+                            padding: 10mm; box-sizing: border-box; 
+                        }
+                        /* Layout Kiri Atas Profesional */
+                        .header { 
+                            text-align: left; 
+                            margin-bottom: 25px; 
+                            padding-bottom: 12px; 
+                            border-bottom: 2px solid #1e293b; 
+                        }
+                        .order-label {
+                            font-size: 10px;
+                            color: #64748b;
+                            text-transform: uppercase;
+                            letter-spacing: 2px;
+                            font-weight: 700;
+                            margin-bottom: 4px;
+                        }
+                        .customer-name { 
+                            font-size: 24px; 
+                            font-weight: 800; 
+                            color: #0f172a; 
+                            margin: 0; 
+                            text-transform: uppercase;
+                            letter-spacing: 0.5px;
+                        }
+                        .order-num { 
+                            font-size: 13px; 
+                            color: #334155; 
+                            font-weight: 600; 
+                            margin-top: 6px; 
+                        }
+                        .print-body { text-align: center; width: 100%; }
+                        .print-body img { max-width: 100%; height: auto; }
+                        
+                        @media print { 
+                            @page { margin: 0; } 
+                            body { margin: 0.5cm; -webkit-print-color-adjust: exact; print-color-adjust: exact; } 
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="print-container">
+                        <div class="header">
+                            <div class="order-label">Detail Pesanan Cetak</div>
+                            <h1 class="customer-name">${order.nama}</h1>
+                            <div class="order-num">NO. ORDER: <span style="color:#000;">${order.no_order.toUpperCase()}</span></div>
+                        </div>
+                        <div class="print-body">
+                            <!-- Ditambahkan timeout 500ms agar browser punya waktu render gambar sebelum dialog print muncul -->
+                            <img src="${dataURL}" onload="setTimeout(() => { window.print(); window.close(); }, 500);" />
+                        </div>
                     </div>
-                    <div class="print-body">
-                        <img src="${dataURL}" onload="window.print(); window.close();" />
-                    </div>
-                </div>
-            </body>
-            </html>
-        `);
-        printWindow.document.close();
-        updateStatus(currentEditingId, "Selesai");
-        tutupEditor();
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+            updateStatus(currentEditingId, "Selesai");
+            tutupEditor();
+        } catch(err) {
+            console.error(err);
+            alert("Terjadi kesalahan saat memuat gambar cetak. Jika gambar tidak muncul, pastikan formatnya bukan file rusak.");
+        }
       }
     </script>
   </body>

@@ -138,6 +138,35 @@ def update_status(order_id):
             
     return jsonify({"success": False, "message": "Order tidak ditemukan"}), 404
 
+# --- FITUR BARU: ROUTE HAPUS ANTRIAN & FILE FISIK ---
+@app.route('/api/delete/<int:order_id>', methods=['DELETE'])
+def delete_order(order_id):
+    db_antrian, current_id = load_db()
+    
+    order_to_delete = None
+    for order in db_antrian:
+        if order['id'] == order_id:
+            order_to_delete = order
+            break
+            
+    if order_to_delete:
+        # Hapus file fisik dari memori server
+        for filename in order_to_delete.get('filenames', []):
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            if os.path.exists(file_path):
+                try:
+                    os.remove(file_path)
+                except:
+                    pass
+                    
+        # Hapus data dari array database json
+        db_antrian = [o for o in db_antrian if o['id'] != order_id]
+        save_db(db_antrian, current_id)
+        
+        return jsonify({"success": True, "message": "Riwayat dan file berhasil dihapus secara permanen"})
+        
+    return jsonify({"success": False, "message": "Data tidak ditemukan"}), 404
+
 @app.route('/download/<filename>')
 def download_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename, as_attachment=True)
