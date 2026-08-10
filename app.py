@@ -7,11 +7,13 @@ from werkzeug.utils import secure_filename
 app = Flask(__name__)
 app.secret_key = 'kunci_rahasia_admin_percetakan'
 
-UPLOAD_FOLDER = 'static/uploads'
+# PERBAIKAN: Gunakan jalur absolut agar hosting tidak salah tempat menyimpan foto/database
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+UPLOAD_FOLDER = os.path.join(BASE_DIR, 'static', 'uploads')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-DB_FILE = 'db_antrian.json'
+DB_FILE = os.path.join(BASE_DIR, 'db_antrian.json')
 
 def load_db():
     if os.path.exists(DB_FILE):
@@ -138,7 +140,6 @@ def update_status(order_id):
             
     return jsonify({"success": False, "message": "Order tidak ditemukan"}), 404
 
-# --- FITUR BARU: ROUTE HAPUS ANTRIAN & FILE FISIK ---
 @app.route('/api/delete/<int:order_id>', methods=['DELETE'])
 def delete_order(order_id):
     db_antrian, current_id = load_db()
@@ -150,7 +151,6 @@ def delete_order(order_id):
             break
             
     if order_to_delete:
-        # Hapus file fisik dari memori server
         for filename in order_to_delete.get('filenames', []):
             file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             if os.path.exists(file_path):
@@ -159,7 +159,6 @@ def delete_order(order_id):
                 except:
                     pass
                     
-        # Hapus data dari array database json
         db_antrian = [o for o in db_antrian if o['id'] != order_id]
         save_db(db_antrian, current_id)
         

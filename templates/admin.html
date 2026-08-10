@@ -122,7 +122,6 @@
 
           <!-- Studio Toolbar Controls -->
           <div class="flex flex-wrap items-center gap-1.5 bg-slate-900/80 p-1.5 rounded-xl border border-slate-700/80">
-            <!-- Paper Size Selector -->
             <select id="pageSizeSelect" onchange="changeCanvasSize()" class="bg-slate-800 text-xs text-slate-200 border border-slate-700 rounded-lg px-2 py-1.5 font-semibold focus:outline-none focus:border-blue-500">
               <option value="a4_p">📄 A4 Portrait</option>
               <option value="a4_l">📄 A4 Landscape</option>
@@ -131,14 +130,12 @@
 
             <div class="h-4 w-px bg-slate-700 mx-1"></div>
 
-            <!-- Layout & Editing Tools -->
             <button onclick="autoLayoutGrid()" title="Susun otomatis seluruh foto" class="bg-blue-600/80 hover:bg-blue-600 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1">🧩 Auto Grid</button>
             <button onclick="rotateImage(90)" title="Putar 90 Derajat" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-2 py-1.5 rounded-lg text-xs font-bold transition">🔄 Putar</button>
             <button onclick="toggleGrayscale()" title="Ubah ke Hitam Putih (Hemat Tinta)" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-2 py-1.5 rounded-lg text-xs font-bold transition">🏁 B&W</button>
             
             <div class="h-4 w-px bg-slate-700 mx-1"></div>
 
-            <!-- Crop Controls -->
             <button id="btn-mulai-potong" onclick="mulaiPotong()" class="bg-indigo-600/80 hover:bg-indigo-600 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition">✂️ Potong</button>
             <button id="btn-terapkan-potong" onclick="terapkanPotong()" class="hidden bg-emerald-600 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold">✅ Terapkan</button>
             <button id="btn-batal-potong" onclick="batalPotong()" class="hidden bg-rose-600 text-white px-2 py-1.5 rounded-lg text-xs font-bold">❌ Batal</button>
@@ -178,7 +175,6 @@
       let cropRect = null;
       let currentImageToCrop = null;
 
-      // Default A4 Portrait Proportion
       canvas.setWidth(750);
       canvas.setHeight(1060);
 
@@ -331,7 +327,6 @@
       setInterval(loadData, 4000);
       loadData();
 
-      /* STUDIO CANVAS EDITOR LOGIC */
       function changeCanvasSize() {
         const val = document.getElementById("pageSizeSelect").value;
         if (val === "a4_p") {
@@ -436,7 +431,7 @@
         document.getElementById('btn-batal-potong').classList.add('hidden');
       }
 
-      // --- PERBAIKAN BUKA EDITOR (Hapus crossOrigin & Deteksi Dokumen) ---
+      // --- PERBAIKAN BUKA EDITOR (Fetch JS to Base64 Bypassing CORS Security) ---
       function bukaEditor(id) {
         currentEditingId = id;
         resetPotongUI();
@@ -454,19 +449,34 @@
         order.filenames.forEach((filename, index) => {
           if (filename.toLowerCase().match(/\.(jpg|jpeg|png)$/)) {
             jumlahGambar++;
-            // Dihapus parameter crossOrigin agar tidak terblokir oleh server lokal
-            fabric.Image.fromURL("/static/uploads/" + filename, function (img) {
-              if (img) {
-                  img.scaleToWidth(300);
-                  img.set({ left: 40 + (index * 25), top: 40 + (index * 25) });
-                  canvas.add(img);
-                  canvas.renderAll();
-              }
-            });
+            
+            // Teknik Fetch langsung agar browser tidak melabeli Canvas tidak aman
+            fetch("/static/uploads/" + filename)
+              .then(res => {
+                  if (!res.ok) throw new Error("Gagal mengambil gambar");
+                  return res.blob();
+              })
+              .then(blob => {
+                  const reader = new FileReader();
+                  reader.onload = function(f) {
+                      fabric.Image.fromURL(f.target.result, function(img) {
+                          if (img) {
+                              img.scaleToWidth(300);
+                              img.set({ left: 40 + (index * 25), top: 40 + (index * 25) });
+                              canvas.add(img);
+                              canvas.renderAll();
+                          }
+                      });
+                  };
+                  reader.readAsDataURL(blob);
+              })
+              .catch(err => {
+                  console.error("Error load blob:", err);
+                  alert("Gambar " + filename + " gagal dimuat. Pastikan file valid.");
+              });
           }
         });
 
-        // Beri peringatan otomatis jika pelanggan mengunggah PDF/Word ke Editor
         if (order.filenames.length > 0 && jumlahGambar === 0) {
             alert("⚠️ Perhatian: File yang dikirim adalah Dokumen (PDF/Word). Editor Studio hanya bisa memuat gambar (JPG/PNG). Silakan gunakan tombol 'Download' untuk mencetak dokumen tersebut secara manual.");
         }
@@ -478,14 +488,12 @@
         batalPotong();
       }
 
-      // --- PERBAIKAN CETAK LANGSUNG (Header Kiri Atas Professional & Delay Render) ---
       function cetakLangsung() {
         const order = globalQueueData.find((q) => q.id === currentEditingId) || globalHistoryData.find((q) => q.id === currentEditingId);
         canvas.discardActiveObject(); 
         canvas.renderAll();
         
         try {
-            // Mengubah format ke PNG untuk render gambar yang lebih tajam dan stabil
             const dataURL = canvas.toDataURL({ format: "png", quality: 1.0 });
             const printWindow = window.open("", "_blank");
             
@@ -495,50 +503,15 @@
                 <head>
                     <title>Print Order - ${order.no_order}</title>
                     <style>
-                        body { 
-                            margin: 0; padding: 0; background: #fff; 
-                            font-family: 'Segoe UI', Arial, sans-serif; 
-                        }
-                        .print-container { 
-                            width: 100%; max-width: 210mm; margin: 0 auto; 
-                            padding: 10mm; box-sizing: border-box; 
-                        }
-                        /* Layout Kiri Atas Profesional */
-                        .header { 
-                            text-align: left; 
-                            margin-bottom: 25px; 
-                            padding-bottom: 12px; 
-                            border-bottom: 2px solid #1e293b; 
-                        }
-                        .order-label {
-                            font-size: 10px;
-                            color: #64748b;
-                            text-transform: uppercase;
-                            letter-spacing: 2px;
-                            font-weight: 700;
-                            margin-bottom: 4px;
-                        }
-                        .customer-name { 
-                            font-size: 24px; 
-                            font-weight: 800; 
-                            color: #0f172a; 
-                            margin: 0; 
-                            text-transform: uppercase;
-                            letter-spacing: 0.5px;
-                        }
-                        .order-num { 
-                            font-size: 13px; 
-                            color: #334155; 
-                            font-weight: 600; 
-                            margin-top: 6px; 
-                        }
+                        body { margin: 0; padding: 0; background: #fff; font-family: 'Segoe UI', Arial, sans-serif; }
+                        .print-container { width: 100%; max-width: 210mm; margin: 0 auto; padding: 10mm; box-sizing: border-box; }
+                        .header { text-align: left; margin-bottom: 25px; padding-bottom: 12px; border-bottom: 2px solid #1e293b; }
+                        .order-label { font-size: 10px; color: #64748b; text-transform: uppercase; letter-spacing: 2px; font-weight: 700; margin-bottom: 4px; }
+                        .customer-name { font-size: 24px; font-weight: 800; color: #0f172a; margin: 0; text-transform: uppercase; letter-spacing: 0.5px; }
+                        .order-num { font-size: 13px; color: #334155; font-weight: 600; margin-top: 6px; }
                         .print-body { text-align: center; width: 100%; }
                         .print-body img { max-width: 100%; height: auto; }
-                        
-                        @media print { 
-                            @page { margin: 0; } 
-                            body { margin: 0.5cm; -webkit-print-color-adjust: exact; print-color-adjust: exact; } 
-                        }
+                        @media print { @page { margin: 0; } body { margin: 0.5cm; -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
                     </style>
                 </head>
                 <body>
@@ -549,7 +522,6 @@
                             <div class="order-num">NO. ORDER: <span style="color:#000;">${order.no_order.toUpperCase()}</span></div>
                         </div>
                         <div class="print-body">
-                            <!-- Timeout 500ms agar browser memuat gambar penuh sebelum dialog print muncul -->
                             <img src="${dataURL}" onload="setTimeout(() => { window.print(); window.close(); }, 500);" />
                         </div>
                     </div>
