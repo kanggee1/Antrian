@@ -7,187 +7,188 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
     <style>
-      /* Responsivitas Canvas Editor untuk layar HP */
-      .canvas-container {
-        margin: 0 auto;
-        max-width: 100% !important;
-        height: auto !important;
-      }
-      .canvas-container canvas {
-        max-width: 100% !important;
-        height: auto !important;
-      }
+      .canvas-container { margin: 0 auto !important; max-width: 100% !important; }
+      .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+      .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
     </style>
   </head>
-  <body class="bg-slate-100 p-2 md:p-8 flex flex-col min-h-screen text-slate-800">
-    <div class="max-w-7xl mx-auto w-full flex-grow">
+  <body class="bg-slate-900 p-2 md:p-6 flex flex-col min-h-screen text-slate-100 font-sans">
+    <div class="max-w-7xl mx-auto w-full flex-grow flex flex-col">
       <!-- Header -->
-      <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4 mt-4 md:mt-0">
+      <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4 bg-slate-800 p-4 rounded-2xl border border-slate-700 shadow-lg">
         <div class="text-center md:text-left">
-          <h1 class="text-2xl md:text-3xl font-black tracking-tight">
-            Dashboard Manajemen Cetak
+          <h1 class="text-xl md:text-2xl font-black tracking-tight text-white flex items-center gap-2 justify-center md:justify-start">
+            🖨️ Management Cetak <span class="text-xs font-semibold bg-blue-500/20 text-blue-400 px-2.5 py-1 rounded-full border border-blue-500/30">Pro v2.0</span>
           </h1>
-          <p class="text-xs text-slate-500 mt-0.5">
-            Professional Print Shop POS & Queue Automation
-          </p>
+          <p class="text-xs text-slate-400 mt-0.5">Control Panel & Studio Editor Canvas</p>
         </div>
-        <div class="flex flex-wrap justify-center md:justify-end items-center gap-3">
-          <a href="/display" target="_blank" class="bg-purple-600 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-purple-700 shadow-md transition flex items-center gap-1.5">📺 Layar Display</a>
-          <a href="/logout" onclick="return confirm('Yakin ingin keluar?');" class="bg-red-500 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-red-600 shadow-md transition">Keluar (Logout)</a>
+        <div class="flex flex-wrap justify-center md:justify-end items-center gap-2.5">
+          <a href="/display" target="_blank" class="bg-purple-600/90 hover:bg-purple-600 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-md">📺 Display Output</a>
+          <a href="/logout" onclick="return confirm('Keluar dari sistem?');" class="bg-rose-600/80 hover:bg-rose-600 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition shadow-md">Keluar</a>
         </div>
       </div>
 
-      <!-- Kartu Statistik -->
+      <!-- Stat Cards -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
+        <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700 flex items-center justify-between">
           <div>
-            <p class="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-wider">Antrian Menunggu</p>
-            <h3 id="stat-menunggu" class="text-3xl font-black text-blue-600 mt-1">0</h3>
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Antrian Menunggu</p>
+            <h3 id="stat-menunggu" class="text-2xl md:text-3xl font-black text-amber-400 mt-1">0</h3>
           </div>
-          <div class="bg-blue-50 p-3 rounded-xl text-blue-600 text-xl font-bold">📋</div>
+          <div class="bg-amber-500/10 p-3 rounded-xl text-amber-400 text-xl font-bold">⏳</div>
         </div>
-        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
+        <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700 flex items-center justify-between">
           <div>
-            <p class="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-wider">Pesanan Selesai</p>
-            <h3 id="stat-selesai" class="text-3xl font-black text-emerald-600 mt-1">0</h3>
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Pesanan Selesai</p>
+            <h3 id="stat-selesai" class="text-2xl md:text-3xl font-black text-emerald-400 mt-1">0</h3>
           </div>
-          <div class="bg-emerald-50 p-3 rounded-xl text-emerald-600 text-xl font-bold">✅</div>
+          <div class="bg-emerald-500/10 p-3 rounded-xl text-emerald-400 text-xl font-bold">✅</div>
         </div>
-        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
+        <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700 flex items-center justify-between">
           <div>
-            <p class="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-wider">Total Pesanan Diproses</p>
-            <h3 id="stat-total" class="text-3xl font-black text-slate-700 mt-1">0</h3>
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Diproses</p>
+            <h3 id="stat-total" class="text-2xl md:text-3xl font-black text-blue-400 mt-1">0</h3>
           </div>
-          <div class="bg-amber-50 p-3 rounded-xl text-amber-600 text-xl font-bold">📊</div>
+          <div class="bg-blue-500/10 p-3 rounded-xl text-blue-400 text-xl font-bold">📊</div>
         </div>
       </div>
 
-      <!-- Tabs & Search -->
-      <div class="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4 mb-4 border-b border-slate-200 pb-3">
-        <div class="flex space-x-2 overflow-x-auto">
-          <button onclick="switchTab('antrian')" id="tab-antrian" class="px-4 py-2 md:px-5 md:py-2.5 font-bold text-xs md:text-sm border-b-2 border-blue-600 text-blue-600 whitespace-nowrap focus:outline-none transition">📋 Antrian Aktif</button>
-          <button onclick="switchTab('riwayat')" id="tab-riwayat" class="px-4 py-2 md:px-5 md:py-2.5 font-bold text-xs md:text-sm border-b-2 border-transparent text-slate-400 hover:text-slate-600 whitespace-nowrap focus:outline-none transition">📜 Riwayat & Re-use</button>
+      <!-- Navigation & Filter -->
+      <div class="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4 mb-4 border-b border-slate-800 pb-3">
+        <div class="flex space-x-2 bg-slate-800 p-1 rounded-xl border border-slate-700 w-fit">
+          <button onclick="switchTab('antrian')" id="tab-antrian" class="px-4 py-2 font-bold text-xs rounded-lg bg-blue-600 text-white transition shadow-md">📋 Antrian Aktif</button>
+          <button onclick="switchTab('riwayat')" id="tab-riwayat" class="px-4 py-2 font-bold text-xs rounded-lg text-slate-400 hover:text-white transition">📜 Riwayat & Re-use</button>
         </div>
-        <div>
-          <input type="text" id="searchInput" oninput="filterTables()" placeholder="🔍 Cari nama atau no order..." class="px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs md:text-sm focus:ring-2 focus:ring-blue-500 w-full md:w-64 shadow-sm" />
+        <div class="relative">
+          <input type="text" id="searchInput" oninput="filterTables()" placeholder="🔍 Cari Nama / No Order..." class="px-4 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 w-full md:w-64" />
         </div>
       </div>
 
-      <!-- Konten Tab Antrian -->
-      <div id="content-antrian" class="tab-content">
-        <div class="bg-white rounded-2xl shadow-sm overflow-hidden border border-slate-200">
-          <div class="bg-blue-600 px-4 md:px-6 py-4 flex justify-between items-center text-white">
-            <h2 class="text-sm md:text-lg font-bold">Daftar Antrian Aktif</h2>
-          </div>
-          <div class="overflow-x-auto max-h-[500px] overflow-y-auto">
-            <table class="min-w-full divide-y divide-slate-100">
-              <thead class="bg-slate-50 sticky top-0 z-10">
+      <!-- Queue Content -->
+      <div id="content-antrian" class="tab-content flex-grow">
+        <div class="bg-slate-800 rounded-2xl shadow-lg border border-slate-700 overflow-hidden">
+          <div class="overflow-x-auto custom-scroll max-h-[550px]">
+            <table class="min-w-full divide-y divide-slate-700/60 text-left">
+              <thead class="bg-slate-800/90 sticky top-0 backdrop-blur z-10">
                 <tr>
-                  <th class="px-4 py-3 text-left text-[10px] md:text-xs font-bold text-slate-400 uppercase">No. Order</th>
-                  <th class="px-4 py-3 text-left text-[10px] md:text-xs font-bold text-slate-400 uppercase">Nama Pelanggan</th>
-                  <th class="px-4 py-3 text-left text-[10px] md:text-xs font-bold text-slate-400 uppercase">File & Dokumen</th>
-                  <th class="px-4 py-3 text-left text-[10px] md:text-xs font-bold text-slate-400 uppercase">Aksi</th>
+                  <th class="px-4 py-3.5 text-[10px] font-bold text-slate-400 uppercase">No. Order</th>
+                  <th class="px-4 py-3.5 text-[10px] font-bold text-slate-400 uppercase">Nama Pelanggan</th>
+                  <th class="px-4 py-3.5 text-[10px] font-bold text-slate-400 uppercase">File Lampiran</th>
+                  <th class="px-4 py-3.5 text-center text-[10px] font-bold text-slate-400 uppercase">Aksi & Kontrol</th>
                 </tr>
               </thead>
-              <tbody id="queue-body" class="bg-white divide-y divide-slate-100 text-xs md:text-sm"></tbody>
+              <tbody id="queue-body" class="divide-y divide-slate-700/40 text-xs text-slate-200"></tbody>
             </table>
           </div>
         </div>
       </div>
 
-      <!-- Konten Tab Riwayat -->
-      <div id="content-riwayat" class="tab-content hidden">
-        <div class="bg-white rounded-2xl shadow-sm overflow-hidden border border-slate-200">
-          <div class="bg-slate-700 px-4 md:px-6 py-4 flex justify-between items-center text-white">
-            <h2 class="text-sm md:text-lg font-bold">Riwayat Cetak & Re-use</h2>
-          </div>
-          <div class="overflow-x-auto max-h-[500px] overflow-y-auto">
-            <table class="min-w-full divide-y divide-slate-100">
-              <thead class="bg-slate-50 sticky top-0 z-10">
+      <!-- History Content -->
+      <div id="content-riwayat" class="tab-content hidden flex-grow">
+        <div class="bg-slate-800 rounded-2xl shadow-lg border border-slate-700 overflow-hidden">
+          <div class="overflow-x-auto custom-scroll max-h-[550px]">
+            <table class="min-w-full divide-y divide-slate-700/60 text-left">
+              <thead class="bg-slate-800/90 sticky top-0 backdrop-blur z-10">
                 <tr>
-                  <th class="px-4 py-3 text-left text-[10px] md:text-xs font-bold text-slate-400 uppercase">No. Order</th>
-                  <th class="px-4 py-3 text-left text-[10px] md:text-xs font-bold text-slate-400 uppercase">Nama Pelanggan</th>
-                  <th class="px-4 py-3 text-left text-[10px] md:text-xs font-bold text-slate-400 uppercase">File</th>
-                  <th class="px-4 py-3 text-left text-[10px] md:text-xs font-bold text-slate-400 uppercase">Status</th>
-                  <th class="px-4 py-3 text-left text-[10px] md:text-xs font-bold text-slate-400 uppercase">Aksi</th>
+                  <th class="px-4 py-3.5 text-[10px] font-bold text-slate-400 uppercase">No. Order</th>
+                  <th class="px-4 py-3.5 text-[10px] font-bold text-slate-400 uppercase">Nama Pelanggan</th>
+                  <th class="px-4 py-3.5 text-[10px] font-bold text-slate-400 uppercase">File</th>
+                  <th class="px-4 py-3.5 text-[10px] font-bold text-slate-400 uppercase">Status</th>
+                  <th class="px-4 py-3.5 text-center text-[10px] font-bold text-slate-400 uppercase">Aksi</th>
                 </tr>
               </thead>
-              <tbody id="history-body" class="bg-white divide-y divide-slate-100 text-xs md:text-sm"></tbody>
+              <tbody id="history-body" class="divide-y divide-slate-700/40 text-xs text-slate-200"></tbody>
             </table>
           </div>
         </div>
       </div>
-      
-      <!-- Footer Credit -->
-      <div class="mt-8 mb-4 text-center text-xs text-slate-400 font-medium tracking-wide">
+
+      <!-- Footer -->
+      <div class="mt-8 mb-4 text-center text-xs text-slate-500 font-medium">
         Created by @egianshari
       </div>
     </div>
 
-    <!-- Modal Editor -->
-    <div id="editorModal" class="hidden fixed inset-0 bg-slate-950 bg-opacity-75 flex items-center justify-center z-50 p-2 md:p-4 backdrop-blur-sm">
-      <div class="bg-white w-full max-w-5xl h-[95vh] md:h-[90vh] rounded-2xl p-4 md:p-6 flex flex-col shadow-2xl border border-slate-200">
+    <!-- Advanced Studio Editor Modal -->
+    <div id="editorModal" class="hidden fixed inset-0 bg-slate-950/90 backdrop-blur-md flex items-center justify-center z-50 p-2 md:p-4">
+      <div class="bg-slate-900 border border-slate-700 w-full max-w-6xl h-[95vh] rounded-2xl flex flex-col shadow-2xl overflow-hidden">
         
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-2">
-          <h3 class="text-base md:text-xl font-bold text-slate-800">Editor Tata Letak & Potong</h3>
-          
-          <!-- Toolbar Alat Edit -->
-          <div class="flex flex-wrap gap-2 bg-slate-100 p-2 rounded-xl w-full md:w-auto justify-center">
-            <button id="btn-mulai-potong" onclick="mulaiPotong()" class="bg-indigo-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-indigo-600 transition flex items-center gap-1">✂️ Potong Gambar</button>
-            <button id="btn-terapkan-potong" onclick="terapkanPotong()" class="hidden bg-emerald-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-emerald-600 transition flex items-center gap-1">✅ Terapkan Potong</button>
-            <button id="btn-batal-potong" onclick="batalPotong()" class="hidden bg-rose-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-rose-600 transition flex items-center gap-1">❌ Batal</button>
-            <button onclick="hapusGambarAktif()" class="bg-slate-400 text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-slate-500 transition flex items-center gap-1">🗑️ Hapus Gambar</button>
+        <!-- Editor Header -->
+        <div class="bg-slate-800 p-3 md:p-4 border-b border-slate-700 flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <span class="text-[10px] font-bold text-blue-400 uppercase tracking-wider">Canvas Studio</span>
+            <h3 id="editing-info" class="text-xs md:text-sm font-extrabold text-white">ORDER #000</h3>
+          </div>
+
+          <!-- Studio Toolbar Controls -->
+          <div class="flex flex-wrap items-center gap-1.5 bg-slate-900/80 p-1.5 rounded-xl border border-slate-700/80">
+            <!-- Paper Size Selector -->
+            <select id="pageSizeSelect" onchange="changeCanvasSize()" class="bg-slate-800 text-xs text-slate-200 border border-slate-700 rounded-lg px-2 py-1.5 font-semibold focus:outline-none focus:border-blue-500">
+              <option value="a4_p">📄 A4 Portrait</option>
+              <option value="a4_l">📄 A4 Landscape</option>
+              <option value="photo_4r">🖼️ Pas Foto / 4R</option>
+            </select>
+
+            <div class="h-4 w-px bg-slate-700 mx-1"></div>
+
+            <!-- Layout & Editing Tools -->
+            <button onclick="autoLayoutGrid()" title="Susun otomatis seluruh foto" class="bg-blue-600/80 hover:bg-blue-600 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1">🧩 Auto Grid</button>
+            <button onclick="rotateImage(90)" title="Putar 90 Derajat" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-2 py-1.5 rounded-lg text-xs font-bold transition">🔄 Putar</button>
+            <button onclick="toggleGrayscale()" title="Ubah ke Hitam Putih (Hemat Tinta)" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-2 py-1.5 rounded-lg text-xs font-bold transition">🏁 B&W</button>
+            
+            <div class="h-4 w-px bg-slate-700 mx-1"></div>
+
+            <!-- Crop Controls -->
+            <button id="btn-mulai-potong" onclick="mulaiPotong()" class="bg-indigo-600/80 hover:bg-indigo-600 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition">✂️ Potong</button>
+            <button id="btn-terapkan-potong" onclick="terapkanPotong()" class="hidden bg-emerald-600 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold">✅ Terapkan</button>
+            <button id="btn-batal-potong" onclick="batalPotong()" class="hidden bg-rose-600 text-white px-2 py-1.5 rounded-lg text-xs font-bold">❌ Batal</button>
+
+            <button onclick="hapusGambarAktif()" title="Hapus objek terpilih" class="bg-rose-600/20 hover:bg-rose-600/40 text-rose-300 border border-rose-500/30 px-2 py-1.5 rounded-lg text-xs font-bold transition">🗑️ Hapus</button>
           </div>
         </div>
 
-        <!-- Canvas Area -->
-        <div class="flex-grow bg-slate-200 border-2 border-dashed border-slate-300 flex items-center justify-center overflow-auto rounded-xl relative">
-          <div id="canvas-wrapper">
+        <!-- Canvas Viewport -->
+        <div class="flex-grow bg-slate-950 p-4 flex items-center justify-center overflow-auto relative">
+          <div id="canvas-wrapper" class="shadow-2xl border border-slate-800 rounded bg-white">
              <canvas id="collageCanvas"></canvas>
           </div>
         </div>
 
-        <!-- Bagian Bawah Editor -->
-        <div class="mt-4 md:mt-6 flex flex-col md:flex-row justify-between items-center gap-3">
-          <p id="editing-info" class="text-slate-600 font-bold text-xs md:text-sm text-center md:text-left"></p>
-          <div class="flex flex-wrap gap-2 justify-center w-full md:w-auto">
-            <button onclick="tutupEditor()" class="flex-1 md:flex-none bg-slate-500 text-white px-4 py-2.5 md:py-2 rounded-xl text-xs md:text-sm font-bold hover:bg-slate-600 transition">Tutup</button>
-            <button onclick="cetakLangsung()" class="flex-1 md:flex-none bg-blue-600 text-white px-5 py-2.5 md:py-2 rounded-xl text-xs md:text-sm font-bold hover:bg-blue-700 shadow-lg shadow-blue-200 transition flex items-center justify-center gap-2">🖨️ Print & Selesai</button>
+        <!-- Editor Footer Actions -->
+        <div class="bg-slate-800 p-3 md:p-4 border-t border-slate-700 flex justify-between items-center">
+          <p class="text-[11px] text-slate-400">Klik & geser gambar untuk mengatur tata letak cetak.</p>
+          <div class="flex gap-2">
+            <button onclick="tutupEditor()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 px-4 py-2 rounded-xl text-xs font-bold transition">Tutup</button>
+            <button onclick="cetakLangsung()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2 rounded-xl text-xs font-bold shadow-lg shadow-emerald-600/20 transition flex items-center gap-1.5">🖨️ Cetak Dokumen</button>
           </div>
         </div>
       </div>
     </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-blue-600 text-white px-4 py-2.5 rounded-xl text-xs font-bold shadow-2xl opacity-0 pointer-events-none transition-all duration-300 transform translate-y-2 z-50"></div>
 
     <script>
       let canvas = new fabric.Canvas("collageCanvas");
       let currentEditingId = null;
       let globalQueueData = [];
       let globalHistoryData = [];
-      let lastQueueLength = 0;
       let activeTab = "antrian";
       
-      // Variabel untuk fitur Potong (Crop)
       let cropRect = null;
       let currentImageToCrop = null;
 
-      // Atur ukuran standar kertas
-      canvas.setWidth(800);
-      canvas.setHeight(560);
-      canvas.setBackgroundColor("#ffffff", canvas.renderAll.bind(canvas));
+      // Default A4 Portrait Proportion
+      canvas.setWidth(750);
+      canvas.setHeight(1060);
 
-      function playBeep() {
-        try {
-          const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-          const osc = audioCtx.createOscillator();
-          const gain = audioCtx.createGain();
-          osc.type = "sine";
-          osc.frequency.setValueAtTime(587.33, audioCtx.currentTime);
-          gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-          osc.connect(gain);
-          gain.connect(audioCtx.destination);
-          osc.start();
-          osc.stop(audioCtx.currentTime + 0.3);
-        } catch (e) {}
+      function showToast(msg) {
+        const toast = document.getElementById("toast");
+        toast.innerText = msg;
+        toast.classList.remove("opacity-0", "translate-y-2", "pointer-events-none");
+        setTimeout(() => {
+          toast.classList.add("opacity-0", "translate-y-2", "pointer-events-none");
+        }, 2500);
       }
 
       function switchTab(tabName) {
@@ -198,13 +199,13 @@
         const contentRiwayat = document.getElementById("content-riwayat");
 
         if (tabName === "antrian") {
-          btnAntrian.className = "px-4 py-2 md:px-5 md:py-2.5 font-bold text-xs md:text-sm border-b-2 border-blue-600 text-blue-600 whitespace-nowrap focus:outline-none transition";
-          btnRiwayat.className = "px-4 py-2 md:px-5 md:py-2.5 font-bold text-xs md:text-sm border-b-2 border-transparent text-slate-400 hover:text-slate-600 whitespace-nowrap focus:outline-none transition";
+          btnAntrian.className = "px-4 py-2 font-bold text-xs rounded-lg bg-blue-600 text-white transition shadow-md";
+          btnRiwayat.className = "px-4 py-2 font-bold text-xs rounded-lg text-slate-400 hover:text-white transition";
           contentAntrian.classList.remove("hidden");
           contentRiwayat.classList.add("hidden");
         } else {
-          btnRiwayat.className = "px-4 py-2 md:px-5 md:py-2.5 font-bold text-xs md:text-sm border-b-2 border-blue-600 text-blue-600 whitespace-nowrap focus:outline-none transition";
-          btnAntrian.className = "px-4 py-2 md:px-5 md:py-2.5 font-bold text-xs md:text-sm border-b-2 border-transparent text-slate-400 hover:text-slate-600 whitespace-nowrap focus:outline-none transition";
+          btnRiwayat.className = "px-4 py-2 font-bold text-xs rounded-lg bg-blue-600 text-white transition shadow-md";
+          btnAntrian.className = "px-4 py-2 font-bold text-xs rounded-lg text-slate-400 hover:text-white transition";
           contentRiwayat.classList.remove("hidden");
           contentAntrian.classList.add("hidden");
         }
@@ -215,8 +216,6 @@
         fetch("/api/queue")
           .then((res) => res.json())
           .then((data) => {
-            if (data.length > lastQueueLength && lastQueueLength !== 0) playBeep();
-            lastQueueLength = data.length;
             globalQueueData = data;
             document.getElementById("stat-menunggu").innerText = data.length;
             renderQueue(data);
@@ -234,33 +233,34 @@
 
       function generateFileHTML(filenames) {
         return filenames.map((f) => {
-            let namaFilePendek = f.substring(13);
+            let shortName = f.length > 22 ? f.substring(13, 30) + "..." : f.substring(13);
             return `
-                <div class="flex flex-col md:flex-row md:items-center gap-1 md:gap-2 mb-2">
-                    <a href="/static/uploads/${f}" target="_blank" class="text-blue-600 hover:underline text-[10px] md:text-xs font-semibold truncate max-w-[120px] md:max-w-[200px]" title="Buka File">📄 ${namaFilePendek}</a>
-                    <a href="/download/${f}" class="bg-slate-200 text-slate-700 hover:bg-slate-300 px-2 py-1 rounded text-[9px] md:text-[10px] font-bold text-center w-max transition">Unduh</a>
+                <div class="flex items-center gap-2 mb-1">
+                    <a href="/static/uploads/${f}" target="_blank" class="text-blue-400 hover:underline font-medium text-xs flex items-center gap-1">📄 ${shortName}</a>
+                    <a href="/download/${f}" class="bg-slate-700 hover:bg-slate-600 text-slate-200 px-2 py-0.5 rounded text-[10px] font-bold">Download</a>
                 </div>`;
           }).join("");
       }
 
+      // Render Queue Table & Action Buttons Fix
       function renderQueue(data) {
         const tbody = document.getElementById("queue-body");
         tbody.innerHTML = "";
         if (data.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="4" class="px-4 py-8 text-center text-slate-400 italic">Belum ada antrian aktif.</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="4" class="px-4 py-8 text-center text-slate-500 italic">Antrian aktif kosong.</td></tr>`;
           return;
         }
         data.forEach((item) => {
           tbody.innerHTML += `
-            <tr class="hover:bg-slate-50 transition border-b border-slate-100">
-                <td class="px-4 py-3"><span class="font-bold text-slate-900">${item.no_order}</span></td>
-                <td class="px-4 py-3 text-slate-800 font-bold">${item.nama}</td>
+            <tr class="hover:bg-slate-700/30 transition border-b border-slate-700/40">
+                <td class="px-4 py-3"><span class="font-extrabold text-blue-400">${item.no_order}</span></td>
+                <td class="px-4 py-3 font-bold text-slate-100">${item.nama}</td>
                 <td class="px-4 py-3">${generateFileHTML(item.filenames)}</td>
-                <td class="px-4 py-3 flex flex-col gap-1.5">
-                    <button onclick="bukaEditor(${item.id})" class="bg-amber-500 text-white px-2 py-1.5 rounded-lg text-[10px] md:text-xs font-bold hover:bg-amber-600 text-center transition">Buka Editor</button>
-                    <div class="flex gap-1.5">
-                        <button onclick="updateStatus(${item.id}, 'Selesai')" class="flex-1 bg-emerald-600 text-white px-1 py-1 rounded-lg text-[10px] md:text-xs font-bold hover:bg-emerald-700 transition">Selesai</button>
-                        <button onclick="updateStatus(${item.id}, 'Dilewati')" class="flex-1 bg-slate-400 text-white px-1 py-1 rounded-lg text-[10px] md:text-xs font-bold hover:bg-slate-500 transition">Lewati</button>
+                <td class="px-4 py-3 text-center">
+                    <div class="flex items-center justify-center gap-1.5">
+                        <button onclick="bukaEditor(${item.id})" class="bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 px-2.5 py-1.5 rounded-lg text-xs font-bold transition">🎨 Editor</button>
+                        <button onclick="updateStatus(${item.id}, 'Selesai')" class="bg-emerald-600 hover:bg-emerald-500 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition shadow-sm">✅ Selesai</button>
+                        <button onclick="updateStatus(${item.id}, 'Dilewati')" class="bg-slate-700 hover:bg-slate-600 text-slate-300 px-2.5 py-1.5 rounded-lg text-xs font-bold transition">⏭️ Lewati</button>
                     </div>
                 </td>
             </tr>`;
@@ -271,19 +271,19 @@
         const tbody = document.getElementById("history-body");
         tbody.innerHTML = "";
         if (data.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="5" class="px-4 py-8 text-center text-slate-400 italic">Belum ada riwayat.</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="5" class="px-4 py-8 text-center text-slate-500 italic">Belum ada riwayat.</td></tr>`;
           return;
         }
         data.forEach((item) => {
-          let color = item.status === "Selesai" ? "text-emerald-600 bg-emerald-50" : "text-slate-400 bg-slate-50";
+          let badgeColor = item.status === "Selesai" ? "text-emerald-400 bg-emerald-500/10 border-emerald-500/20" : "text-slate-400 bg-slate-700/50 border-slate-600";
           tbody.innerHTML += `
-            <tr class="hover:bg-slate-50 transition border-b border-slate-100">
-                <td class="px-4 py-3 font-bold text-slate-900">${item.no_order}</td>
-                <td class="px-4 py-3 font-bold text-slate-800">${item.nama}</td>
+            <tr class="hover:bg-slate-700/30 transition border-b border-slate-700/40">
+                <td class="px-4 py-3 font-extrabold text-slate-300">${item.no_order}</td>
+                <td class="px-4 py-3 font-bold text-slate-200">${item.nama}</td>
                 <td class="px-4 py-3">${generateFileHTML(item.filenames)}</td>
-                <td class="px-4 py-3"><span class="px-2 py-1 rounded-md text-[10px] md:text-xs font-bold ${color}">${item.status}</span></td>
-                <td class="px-4 py-3">
-                    <button onclick="updateStatus(${item.id}, 'Menunggu')" class="w-full bg-blue-600 text-white px-2 py-1.5 rounded-lg text-[10px] md:text-xs font-bold hover:bg-blue-700 transition">🔄 Proses Ulang</button>
+                <td class="px-4 py-3"><span class="px-2 py-0.5 rounded-md text-[10px] font-bold border ${badgeColor}">${item.status}</span></td>
+                <td class="px-4 py-3 text-center">
+                    <button onclick="updateStatus(${item.id}, 'Menunggu')" class="bg-blue-600/20 hover:bg-blue-600/40 text-blue-300 border border-blue-500/30 px-3 py-1.5 rounded-lg text-xs font-bold transition">🔄 Proses Ulang</button>
                 </td>
             </tr>`;
         });
@@ -298,79 +298,127 @@
         }
       }
 
-      setInterval(loadData, 3000);
-      loadData();
-
       function updateStatus(id, status) {
         fetch(`/api/update_status/${id}`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ status: status }),
-        }).then(() => {
-          loadData();
-          if(status === 'Menunggu') {
-             alert('✅ Berhasil! Pesanan dikembalikan ke Antrian Aktif (Proses Ulang).');
+        }).then((res) => res.json()).then((res) => {
+          if (res.success) {
+            showToast(`Status diperbarui ke: ${status}`);
+            loadData();
           }
         });
       }
 
-      /* FITUR HAPUS DAN POTONG DI EDITOR */
+      setInterval(loadData, 4000);
+      loadData();
+
+      /* STUDIO CANVAS EDITOR LOGIC */
+      function changeCanvasSize() {
+        const val = document.getElementById("pageSizeSelect").value;
+        if (val === "a4_p") {
+          canvas.setWidth(750); canvas.setHeight(1060);
+        } else if (val === "a4_l") {
+          canvas.setWidth(1060); canvas.setHeight(750);
+        } else if (val === "photo_4r") {
+          canvas.setWidth(600); canvas.setHeight(900);
+        }
+        canvas.setBackgroundColor("#ffffff", canvas.renderAll.bind(canvas));
+      }
+
+      function autoLayoutGrid() {
+        let objects = canvas.getObjects().filter(o => o.type === 'image');
+        if (objects.length === 0) return;
+        let cols = objects.length > 2 ? 2 : 1;
+        let padding = 20;
+        let cellW = (canvas.width - (padding * (cols + 1))) / cols;
+        
+        let curX = padding, curY = padding, maxH = 0;
+        objects.forEach((img, idx) => {
+          img.scaleToWidth(cellW);
+          img.set({ left: curX, top: curY });
+          maxH = Math.max(maxH, img.getScaledHeight());
+          if ((idx + 1) % cols === 0) {
+            curX = padding; curY += maxH + padding; maxH = 0;
+          } else {
+            curX += cellW + padding;
+          }
+        });
+        canvas.renderAll();
+        showToast("Layout rapi otomatis diterapkan.");
+      }
+
+      function rotateImage(deg) {
+        let activeObj = canvas.getActiveObject();
+        if (!activeObj) return;
+        activeObj.rotate((activeObj.angle + deg) % 360);
+        canvas.renderAll();
+      }
+
+      function toggleGrayscale() {
+        let activeObj = canvas.getActiveObject();
+        if (!activeObj || activeObj.type !== 'image') return;
+        if (activeObj.filters && activeObj.filters.length > 0) {
+          activeObj.filters = [];
+        } else {
+          activeObj.filters.push(new fabric.Image.filters.Grayscale());
+        }
+        activeObj.applyFilters();
+        canvas.renderAll();
+      }
+
       function hapusGambarAktif() {
-          let activeObj = canvas.getActiveObject();
-          if (activeObj) canvas.remove(activeObj);
+        let activeObj = canvas.getActiveObject();
+        if (activeObj) canvas.remove(activeObj);
       }
 
       function mulaiPotong() {
-          let activeObj = canvas.getActiveObject();
-          if (!activeObj || activeObj.type !== 'image') {
-              alert("Silakan klik/pilih salah satu gambar terlebih dahulu untuk dipotong.");
-              return;
-          }
-          currentImageToCrop = activeObj;
-          
-          cropRect = new fabric.Rect({
-              left: activeObj.left, top: activeObj.top,
-              width: activeObj.getScaledWidth(), height: activeObj.getScaledHeight(),
-              fill: 'rgba(0,0,0,0.4)', transparentCorners: false, cornerColor: '#3b82f6',
-              cornerStrokeColor: '#ffffff', borderColor: '#3b82f6', cornerSize: 15,
-              padding: 0, cornerStyle: 'circle', borderDashArray: [5, 5],
-              hasRotatingPoint: false
-          });
-          canvas.add(cropRect);
-          canvas.setActiveObject(cropRect);
-          
-          document.getElementById('btn-mulai-potong').classList.add('hidden');
-          document.getElementById('btn-terapkan-potong').classList.remove('hidden');
-          document.getElementById('btn-batal-potong').classList.remove('hidden');
+        let activeObj = canvas.getActiveObject();
+        if (!activeObj || activeObj.type !== 'image') {
+          alert("Pilih satu gambar terlebih dahulu.");
+          return;
+        }
+        currentImageToCrop = activeObj;
+        cropRect = new fabric.Rect({
+          left: activeObj.left, top: activeObj.top,
+          width: activeObj.getScaledWidth(), height: activeObj.getScaledHeight(),
+          fill: 'rgba(0,0,0,0.4)', transparentCorners: false, cornerColor: '#3b82f6',
+          cornerSize: 12, cornerStyle: 'circle', hasRotatingPoint: false
+        });
+        canvas.add(cropRect);
+        canvas.setActiveObject(cropRect);
+        
+        document.getElementById('btn-mulai-potong').classList.add('hidden');
+        document.getElementById('btn-terapkan-potong').classList.remove('hidden');
+        document.getElementById('btn-batal-potong').classList.remove('hidden');
       }
 
       function terapkanPotong() {
-          if (cropRect && currentImageToCrop) {
-              // Menerapkan Absolute ClipPath ala Fabric v5
-              currentImageToCrop.clipPath = new fabric.Rect({
-                  left: cropRect.left, top: cropRect.top,
-                  width: cropRect.getScaledWidth(), height: cropRect.getScaledHeight(),
-                  absolutePositioned: true
-              });
-              canvas.remove(cropRect);
-              canvas.renderAll();
-          }
-          resetPotongUI();
+        if (cropRect && currentImageToCrop) {
+          currentImageToCrop.clipPath = new fabric.Rect({
+            left: cropRect.left, top: cropRect.top,
+            width: cropRect.getScaledWidth(), height: cropRect.getScaledHeight(),
+            absolutePositioned: true
+          });
+          canvas.remove(cropRect);
+          canvas.renderAll();
+        }
+        resetPotongUI();
       }
 
       function batalPotong() {
-          if(cropRect) canvas.remove(cropRect);
-          resetPotongUI();
+        if (cropRect) canvas.remove(cropRect);
+        resetPotongUI();
       }
 
       function resetPotongUI() {
-          cropRect = null; currentImageToCrop = null;
-          document.getElementById('btn-mulai-potong').classList.remove('hidden');
-          document.getElementById('btn-terapkan-potong').classList.add('hidden');
-          document.getElementById('btn-batal-potong').classList.add('hidden');
+        cropRect = null; currentImageToCrop = null;
+        document.getElementById('btn-mulai-potong').classList.remove('hidden');
+        document.getElementById('btn-terapkan-potong').classList.add('hidden');
+        document.getElementById('btn-batal-potong').classList.add('hidden');
       }
 
-      /* BUKA TUTUP EDITOR */
       function bukaEditor(id) {
         currentEditingId = id;
         resetPotongUI();
@@ -378,7 +426,7 @@
         if (!order) return;
 
         document.getElementById("editorModal").classList.remove("hidden");
-        document.getElementById("editing-info").innerText = `NO. ORDER: ${order.no_order.toUpperCase()} — NAMA: ${order.nama.toUpperCase()}`;
+        document.getElementById("editing-info").innerText = `ORDER #${order.no_order} — ${order.nama.toUpperCase()}`;
 
         canvas.clear();
         canvas.setBackgroundColor("#ffffff", canvas.renderAll.bind(canvas));
@@ -387,7 +435,7 @@
           if (filename.toLowerCase().match(/\.(jpg|jpeg|png)$/)) {
             fabric.Image.fromURL("/static/uploads/" + filename, function (img) {
               img.scaleToWidth(300);
-              img.set({ left: 30 + (index * 20), top: 30 + (index * 20) });
+              img.set({ left: 40 + (index * 25), top: 40 + (index * 25) });
               canvas.add(img);
               canvas.renderAll();
             });
@@ -401,11 +449,8 @@
         batalPotong();
       }
 
-      /* DESAIN CETAK MINIMALIS & ELEGAN */
       function cetakLangsung() {
         const order = globalQueueData.find((q) => q.id === currentEditingId) || globalHistoryData.find((q) => q.id === currentEditingId);
-        
-        // Membersihkan seleksi gambar sebelum difoto
         canvas.discardActiveObject(); 
         canvas.renderAll();
         
@@ -418,66 +463,22 @@
             <head>
                 <title>Print Order - ${order.no_order}</title>
                 <style>
-                    body { 
-                        margin: 0; padding: 0; background: #fff; 
-                        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; 
-                    }
-                    .print-container { 
-                        width: 100%; max-width: 210mm; margin: 0 auto; 
-                        padding: 10mm; box-sizing: border-box;
-                    }
-                    /* Desain Minimalis Elegan */
-                    .elegant-header {
-                        text-align: center;
-                        margin-bottom: 30px;
-                        padding-bottom: 20px;
-                        border-bottom: 1px solid #eaeaea;
-                    }
-                    .order-label {
-                        font-size: 11px;
-                        color: #888;
-                        text-transform: uppercase;
-                        letter-spacing: 3px;
-                        margin-bottom: 4px;
-                    }
-                    .customer-name {
-                        font-size: 24px;
-                        font-weight: 300;
-                        color: #111;
-                        letter-spacing: 1px;
-                        margin: 0;
-                    }
-                    .order-number {
-                        font-size: 12px;
-                        color: #555;
-                        font-weight: bold;
-                        margin-top: 8px;
-                    }
-                    .print-body {
-                        text-align: center;
-                        width: 100%;
-                    }
-                    .print-body img {
-                        max-width: 100%;
-                        height: auto;
-                    }
-                    
-                    @media print {
-                        @page { margin: 0; }
-                        body { margin: 1cm; -webkit-print-color-adjust: exact; }
-                    }
+                    body { margin: 0; padding: 0; background: #fff; font-family: Arial, sans-serif; }
+                    .print-container { width: 100%; max-width: 210mm; margin: 0 auto; padding: 10mm; box-sizing: border-box; }
+                    .header { text-align: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #ddd; }
+                    .customer-name { font-size: 22px; font-weight: bold; margin: 0; }
+                    .order-num { font-size: 12px; color: #666; margin-top: 5px; }
+                    .print-body { text-align: center; }
+                    .print-body img { max-width: 100%; height: auto; }
+                    @media print { @page { margin: 0; } body { margin: 0.5cm; } }
                 </style>
             </head>
             <body>
                 <div class="print-container">
-                    <!-- HEADER MINIMALIS -->
-                    <div class="elegant-header">
-                        <div class="order-label">Order Details</div>
+                    <div class="header">
                         <h1 class="customer-name">${order.nama.toUpperCase()}</h1>
-                        <div class="order-number">No Order: ${order.no_order.toUpperCase()}</div>
+                        <div class="order-num">NO ORDER: ${order.no_order.toUpperCase()}</div>
                     </div>
-
-                    <!-- KONTEN GAMBAR -->
                     <div class="print-body">
                         <img src="${dataURL}" onload="window.print(); window.close();" />
                     </div>
@@ -486,7 +487,6 @@
             </html>
         `);
         printWindow.document.close();
-
         updateStatus(currentEditingId, "Selesai");
         tutupEditor();
       }
