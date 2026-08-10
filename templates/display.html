@@ -5,23 +5,42 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Display Antrian Cetak</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = { darkMode: 'class' }
+    </script>
     <style>
       .custom-scroll::-webkit-scrollbar { width: 4px; }
-      .custom-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+      .custom-scroll::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 4px; }
+      .dark .custom-scroll::-webkit-scrollbar-thumb { background: #334155; }
     </style>
   </head>
-  <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between p-6 md:p-10 font-sans antialiased">
+  <body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 min-h-screen flex flex-col justify-between p-6 md:p-10 font-sans antialiased transition-colors duration-300">
     
     <!-- Header -->
-    <header class="flex flex-col md:flex-row items-center justify-between gap-4 max-w-7xl mx-auto w-full pb-6 border-b border-slate-800/80">
+    <header class="flex flex-col md:flex-row items-center justify-between gap-4 max-w-7xl mx-auto w-full pb-6 border-b border-slate-200 dark:border-slate-800/80 transition-colors">
       <div class="flex items-center gap-3">
-        <div class="h-3 w-3 rounded-full bg-emerald-500 animate-pulse"></div>
-        <h1 class="text-lg md:text-xl font-semibold tracking-wide text-slate-200 uppercase">
+        <div class="h-3 w-3 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.6)]"></div>
+        <h1 class="text-lg md:text-xl font-bold tracking-wide text-slate-700 dark:text-slate-200 uppercase">
           Status Antrian Cetak
         </h1>
       </div>
-      <div class="text-xs font-mono text-slate-400 bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-full flex items-center gap-2">
-        <span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span> Live Monitor
+      
+      <!-- Top Controls -->
+      <div class="flex items-center gap-3">
+        <!-- Live Clock -->
+        <div id="live-clock" class="text-sm font-mono font-bold text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-4 py-1.5 rounded-full shadow-sm">
+          00:00:00
+        </div>
+        
+        <!-- Fullscreen Toggle -->
+        <button onclick="toggleFullScreen()" class="p-2 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-500 hover:text-indigo-500 transition shadow-sm" title="Layar Penuh">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" /></svg>
+        </button>
+
+        <!-- Theme Toggle -->
+        <button onclick="toggleTheme()" class="p-2 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-amber-500 dark:text-amber-400 hover:text-indigo-500 transition shadow-sm" title="Mode Siang/Malam">
+          <span id="theme-icon">☀️</span>
+        </button>
       </div>
     </header>
 
@@ -29,37 +48,37 @@
     <main class="grid grid-cols-1 lg:grid-cols-12 gap-6 my-auto max-w-7xl mx-auto w-full py-8">
       
       <!-- Card: Sedang Diproses -->
-      <section class="lg:col-span-7 bg-slate-900/60 backdrop-blur-xl border border-slate-800/80 p-8 md:p-12 rounded-3xl shadow-2xl flex flex-col justify-between relative overflow-hidden">
-        <div class="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 rounded-full blur-3xl pointer-events-none"></div>
+      <section class="lg:col-span-7 bg-white dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200 dark:border-slate-800/80 p-8 md:p-12 rounded-3xl shadow-xl flex flex-col justify-between relative overflow-hidden transition-colors">
+        <div class="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 dark:bg-indigo-500/5 rounded-full blur-3xl pointer-events-none transition-colors"></div>
         
         <div>
           <div class="flex items-center justify-between mb-6">
-            <span class="text-xs font-semibold uppercase tracking-widest text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-3 py-1 rounded-full">
+            <span class="text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400 bg-indigo-100 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20 px-3 py-1 rounded-full">
               Sedang Diproses
             </span>
-            <span class="text-xs text-slate-500 font-mono">PRIORITY #1</span>
+            <span class="text-xs text-slate-400 dark:text-slate-500 font-mono font-semibold">PRIORITY #1</span>
           </div>
 
-          <div id="current-processing" class="text-7xl md:text-9xl font-black text-white tracking-tight my-6 font-mono">
+          <div id="current-processing" class="text-7xl md:text-9xl font-black text-slate-900 dark:text-white tracking-tight my-6 font-mono transition-colors">
             ---
           </div>
         </div>
 
-        <div class="pt-6 border-t border-slate-800/60">
-          <p class="text-xs font-medium uppercase tracking-wider text-slate-500 mb-1">Pemilik Pesanan</p>
-          <p id="current-name" class="text-xl md:text-2xl font-medium text-slate-200 truncate">
+        <div class="pt-6 border-t border-slate-100 dark:border-slate-800/60 transition-colors">
+          <p class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1">Pemilik Pesanan</p>
+          <p id="current-name" class="text-xl md:text-2xl font-bold text-slate-700 dark:text-slate-200 truncate transition-colors">
             Menunggu Antrian...
           </p>
         </div>
       </section>
 
       <!-- Card: Antrian Berikutnya -->
-      <section class="lg:col-span-5 bg-slate-900/60 backdrop-blur-xl border border-slate-800/80 p-6 md:p-8 rounded-3xl shadow-2xl flex flex-col">
-        <div class="flex items-center justify-between pb-4 mb-4 border-b border-slate-800/60">
-          <h2 class="text-xs font-semibold uppercase tracking-widest text-slate-400">
+      <section class="lg:col-span-5 bg-white dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200 dark:border-slate-800/80 p-6 md:p-8 rounded-3xl shadow-xl flex flex-col transition-colors">
+        <div class="flex items-center justify-between pb-4 mb-4 border-b border-slate-100 dark:border-slate-800/60 transition-colors">
+          <h2 class="text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
             Antrian Berikutnya
           </h2>
-          <span class="text-xs text-slate-500 font-mono">NEXT UP</span>
+          <span class="text-xs text-slate-400 dark:text-slate-500 font-mono font-semibold">NEXT UP</span>
         </div>
 
         <div id="next-queue-list" class="space-y-2.5 overflow-y-auto max-h-[360px] pr-1 custom-scroll flex-grow">
@@ -69,11 +88,55 @@
     </main>
 
     <!-- Footer -->
-    <footer class="text-center text-xs text-slate-600 font-mono pt-4 border-t border-slate-800/40">
+    <footer class="text-center text-xs text-slate-400 dark:text-slate-600 font-mono pt-4 border-t border-slate-200 dark:border-slate-800/40 transition-colors">
       Created by @egianshari
     </footer>
 
     <script>
+      // 1. Theme Configuration
+      function initTheme() {
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+          document.documentElement.classList.add('dark');
+          document.getElementById('theme-icon').innerText = '☀️';
+        } else {
+          document.documentElement.classList.remove('dark');
+          document.getElementById('theme-icon').innerText = '🌙';
+        }
+      }
+      function toggleTheme() {
+        document.documentElement.classList.toggle('dark');
+        if (document.documentElement.classList.contains('dark')) {
+          localStorage.theme = 'dark';
+          document.getElementById('theme-icon').innerText = '☀️';
+        } else {
+          localStorage.theme = 'light';
+          document.getElementById('theme-icon').innerText = '🌙';
+        }
+      }
+      initTheme();
+
+      // 2. Live Clock
+      function updateClock() {
+        const now = new Date();
+        document.getElementById('live-clock').innerText = now.toLocaleTimeString('id-ID', { hour12: false });
+      }
+      setInterval(updateClock, 1000);
+      updateClock();
+
+      // 3. Fullscreen Toggle
+      function toggleFullScreen() {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(err => {
+            console.log(`Error attempting to enable full-screen mode: ${err.message}`);
+          });
+        } else {
+          if (document.exitFullscreen) {
+            document.exitFullscreen();
+          }
+        }
+      }
+
+      // 4. Data Loader
       function loadDisplay() {
         fetch("/api/queue")
           .then((res) => res.json())
@@ -90,16 +153,16 @@
               if (data.length > 1) {
                 for (let i = 1; i < data.length; i++) {
                   nextListEl.innerHTML += `
-                    <div class="bg-slate-900/80 border border-slate-800/80 p-4 rounded-2xl flex justify-between items-center transition hover:border-slate-700">
-                      <span class="font-mono font-bold text-lg text-indigo-400">#${data[i].no_order}</span>
-                      <span class="text-slate-300 text-sm font-medium truncate max-w-[200px]">${data[i].nama}</span>
+                    <div class="bg-slate-50 dark:bg-slate-900/80 border border-slate-100 dark:border-slate-800/80 p-4 rounded-2xl flex justify-between items-center transition hover:border-slate-300 dark:hover:border-slate-700">
+                      <span class="font-mono font-bold text-lg text-indigo-600 dark:text-indigo-400">#${data[i].no_order}</span>
+                      <span class="text-slate-600 dark:text-slate-300 text-sm font-semibold truncate max-w-[200px]">${data[i].nama}</span>
                     </div>
                   `;
                 }
               } else {
                 nextListEl.innerHTML = `
                   <div class="h-full flex items-center justify-center py-12">
-                    <p class="text-slate-600 text-xs italic">Tidak ada antrian berikutnya.</p>
+                    <p class="text-slate-400 dark:text-slate-600 text-xs italic font-medium">Tidak ada antrian berikutnya.</p>
                   </div>`;
               }
             } else {
@@ -107,7 +170,7 @@
               nameEl.innerText = "Belum ada antrian masuk";
               nextListEl.innerHTML = `
                 <div class="h-full flex items-center justify-center py-12">
-                  <p class="text-slate-600 text-xs italic">Antrian bersih.</p>
+                  <p class="text-slate-400 dark:text-slate-600 text-xs italic font-medium">Antrian bersih.</p>
                 </div>`;
             }
           });

@@ -3,67 +3,147 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Kirim File Cetak - Professional Print Shop</title>
+    <title>Kirim File Cetak - Studio Percetakan</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = { darkMode: 'class' }
+    </script>
   </head>
-  <body class="bg-slate-950 text-slate-100 antialiased min-h-screen flex flex-col items-center justify-center p-4">
+  <body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 antialiased min-h-screen flex flex-col transition-colors duration-300 relative">
     
-    <main class="w-full max-w-md my-auto">
+    <!-- Theme Toggle (Pojok Kanan Atas) -->
+    <div class="absolute top-4 right-4 md:top-6 md:right-6">
+      <button onclick="toggleTheme()" class="p-2.5 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition text-slate-500 dark:text-amber-400">
+        <span id="theme-icon">🌙</span>
+      </button>
+    </div>
+
+    <main class="w-full max-w-md my-auto px-4 py-12 mx-auto">
       <!-- Card Utama -->
-      <div class="bg-slate-900/80 backdrop-blur-xl p-8 rounded-3xl border border-slate-800 shadow-2xl">
+      <div class="bg-white dark:bg-slate-900/80 backdrop-blur-xl p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl transition-colors">
         
         <!-- Header -->
-        <div class="mb-8">
-          <span class="inline-block text-[10px] font-mono font-semibold uppercase tracking-widest text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-3 py-1 rounded-full mb-3">
-            Self-Service Printing
+        <div class="mb-8 text-center md:text-left">
+          <span class="inline-block text-[10px] font-mono font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20 px-3 py-1 rounded-full mb-3">
+            Self-Service Drop
           </span>
-          <h1 class="text-2xl font-extrabold text-white tracking-tight">
+          <h1 class="text-2xl font-black text-slate-800 dark:text-white tracking-tight">
             Form Antrian Cetak
           </h1>
-          <p class="text-slate-400 text-xs mt-1">
-            Isi data dan unggah dokumen Anda secara instan.
+          <p class="text-slate-500 dark:text-slate-400 text-xs mt-1.5 font-medium">
+            Lengkapi data dan unggah dokumen Anda.
           </p>
         </div>
 
         <!-- Form -->
-        <form action="/api/submit" method="POST" enctype="multipart/form-data" class="space-y-5">
+        <form id="printForm" action="/api/submit" method="POST" enctype="multipart/form-data" class="space-y-5">
           <div>
-            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Nama Lengkap</label>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-2">Nama Lengkap</label>
             <input type="text" name="nama" required placeholder="Masukkan nama Anda"
-              class="w-full px-4 py-3 bg-slate-950/60 border border-slate-800 rounded-xl focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition text-sm text-slate-100 placeholder-slate-600" />
+              class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition text-sm text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-600 font-medium shadow-inner" />
           </div>
 
           <div>
-            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Nomor Order</label>
-            <input type="text" name="no_order" required placeholder="Contoh: 123..."
-              class="w-full px-4 py-3 bg-slate-950/60 border border-slate-800 rounded-xl focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition text-sm text-slate-100 placeholder-slate-600 font-mono" />
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-2">Nomor Order</label>
+            <input type="text" name="no_order" required placeholder="Contoh: 12345"
+              class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition text-sm text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-600 font-mono font-bold shadow-inner" />
           </div>
 
           <div>
-            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Upload File (Bisa Banyak)</label>
-            <div class="relative">
-              <input type="file" name="file_upload" accept=".pdf, image/jpeg, image/png, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document" multiple required
-                class="w-full text-xs text-slate-400 
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-2">Pilih File (<span class="normal-case text-slate-400">Bisa banyak file</span>)</label>
+            <div class="relative group">
+              <input type="file" id="file_upload" name="file_upload" accept=".pdf, image/jpeg, image/png, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document" multiple required
+                class="w-full text-sm text-slate-500 dark:text-slate-400 
                        file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 
-                       file:text-xs file:font-semibold file:bg-indigo-600/20 file:text-indigo-400 
-                       hover:file:bg-indigo-600/30 file:transition file:cursor-pointer 
-                       border border-slate-800 rounded-xl bg-slate-950/60 p-2 cursor-pointer" />
+                       file:text-xs file:font-bold file:bg-indigo-100 dark:file:bg-indigo-600/20 file:text-indigo-600 dark:file:text-indigo-400 
+                       hover:file:bg-indigo-200 dark:hover:file:bg-indigo-600/30 file:transition file:cursor-pointer 
+                       border border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50 dark:bg-slate-950/60 p-2 cursor-pointer shadow-inner transition-colors" />
             </div>
-            <p class="text-[11px] text-slate-500 mt-2 font-mono">Format didukung: JPG, PNG, PDF, DOCX</p>
+            
+            <!-- Smart File Indicator -->
+            <div id="file-info-container" class="hidden mt-2 p-2 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 rounded-lg flex items-start gap-2">
+              <span class="text-emerald-600 dark:text-emerald-400 mt-0.5">✅</span>
+              <div>
+                <p id="file-count" class="text-xs font-bold text-emerald-700 dark:text-emerald-400"></p>
+                <p class="text-[10px] text-emerald-600 dark:text-emerald-500/70 font-mono">Format aman diproses.</p>
+              </div>
+            </div>
+
+            <p id="file-hint" class="text-[10px] text-slate-400 dark:text-slate-500 mt-2 font-mono">Format didukung: JPG, PNG, PDF, DOCX</p>
           </div>
 
-          <button type="submit" 
-            class="w-full bg-indigo-600 hover:bg-indigo-500 active:scale-[0.99] text-white font-semibold py-3.5 px-4 rounded-xl shadow-lg shadow-indigo-600/20 transition duration-200 text-sm mt-4">
-            Kirim ke Antrian
+          <button type="submit" id="submitBtn" 
+            class="w-full bg-indigo-600 hover:bg-indigo-700 active:scale-[0.99] text-white font-bold py-3.5 px-4 rounded-xl shadow-lg shadow-indigo-600/20 transition duration-200 text-sm mt-4 flex items-center justify-center gap-2">
+            <span>Kirim ke Antrian Studio</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
           </button>
         </form>
       </div>
     </main>
     
-    <!-- Footer Credit -->
-    <footer class="mt-8 text-center text-xs text-slate-600 font-mono">
+    <footer class="mt-auto pb-6 text-center text-xs text-slate-400 dark:text-slate-600 font-mono transition-colors">
       Created by @egianshari
     </footer>
 
+    <script>
+      // 1. Theme Configuration
+      function initTheme() {
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+          document.documentElement.classList.add('dark');
+          document.getElementById('theme-icon').innerText = '☀️';
+        } else {
+          document.documentElement.classList.remove('dark');
+          document.getElementById('theme-icon').innerText = '🌙';
+        }
+      }
+      function toggleTheme() {
+        document.documentElement.classList.toggle('dark');
+        if (document.documentElement.classList.contains('dark')) {
+          localStorage.theme = 'dark';
+          document.getElementById('theme-icon').innerText = '☀️';
+        } else {
+          localStorage.theme = 'light';
+          document.getElementById('theme-icon').innerText = '🌙';
+        }
+      }
+      initTheme();
+
+      // 2. Smart File Indicator Logic
+      const fileInput = document.getElementById('file_upload');
+      const infoContainer = document.getElementById('file-info-container');
+      const fileCountText = document.getElementById('file-count');
+      const fileHint = document.getElementById('file-hint');
+
+      fileInput.addEventListener('change', function() {
+        if (this.files && this.files.length > 0) {
+          infoContainer.classList.remove('hidden');
+          fileHint.classList.add('hidden');
+          
+          if (this.files.length === 1) {
+            fileCountText.textContent = `1 File Terlampir: ${this.files[0].name}`;
+          } else {
+            fileCountText.textContent = `${this.files.length} File berhasil dilampirkan.`;
+          }
+        } else {
+          infoContainer.classList.add('hidden');
+          fileHint.classList.remove('hidden');
+        }
+      });
+
+      // 3. Double Submit Protection & UI Feedback
+      document.getElementById('printForm').addEventListener('submit', function(e) {
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        btn.classList.remove('hover:bg-indigo-700', 'active:scale-[0.99]', 'bg-indigo-600');
+        btn.classList.add('bg-indigo-400', 'cursor-not-allowed');
+        btn.innerHTML = `
+          <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          Mengirim Data...
+        `;
+      });
+    </script>
   </body>
 </html>
