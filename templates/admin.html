@@ -3,15 +3,13 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Panel Admin - Professional Print Studio Pro v4.0</title>
+    <title>Panel Admin - Professional Print Studio Ultimate</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = { darkMode: 'class' }
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
-    <!-- Library QR Code Generator -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <!-- Library PDF.js untuk merender PDF ke Canvas -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
     <style>
       .canvas-container { margin: 0 auto !important; max-width: 100% !important; }
@@ -31,11 +29,9 @@
           <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Control Panel & Studio Editor Sparepart</p>
         </div>
         <div class="flex flex-wrap justify-center md:justify-end items-center gap-2.5">
-          <!-- Switch Theme Mode -->
           <button onclick="toggleTheme()" class="bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-200 px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
             <span id="theme-icon">☀️</span> <span id="theme-text">Mode Terang</span>
           </button>
-
           <a href="/display" target="_blank" class="bg-purple-600 hover:bg-purple-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-md">📺 Display Output</a>
           <a href="/logout" onclick="return confirm('Keluar dari sistem?');" class="bg-rose-600 hover:bg-rose-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition shadow-md">Keluar</a>
         </div>
@@ -115,7 +111,7 @@
           </div>
         </div>
       </div>
-
+      
       <!-- Footer -->
       <div class="mt-8 mb-4 text-center text-xs text-slate-400 font-medium">
         Created by @egianshari
@@ -128,9 +124,13 @@
         
         <!-- Editor Header Toolbar -->
         <div class="bg-slate-100 dark:bg-slate-800 p-3 border-b border-slate-200 dark:border-slate-700 flex flex-wrap items-center justify-between gap-2.5">
-          <div>
-            <span class="text-[10px] font-bold text-indigo-500 uppercase tracking-wider">Canvas Studio Ultimate</span>
-            <h3 id="editing-info" class="text-xs md:text-sm font-extrabold text-slate-800 dark:text-white">ORDER #000</h3>
+          <div class="flex items-center gap-2">
+            <div>
+              <span class="text-[10px] font-bold text-indigo-500 uppercase tracking-wider">Canvas Studio Ultimate</span>
+              <h3 id="editing-info" class="text-xs md:text-sm font-extrabold text-slate-800 dark:text-white">ORDER #000</h3>
+            </div>
+            <!-- Bantuan Pintasan Button -->
+            <button onclick="alert('Pintasan Keyboard Editor:\n\n• Panah Kiri/Kanan/Atas/Bawah = Geser Objek\n• Shift + Panah = Geser Cepat\n• Tombol Delete / Backspace = Hapus Objek\n• Ctrl + Z = Batal (Undo)\n• Ctrl + Y = Ulangi (Redo)')" class="ml-2 bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 w-6 h-6 rounded-full text-[10px] font-bold hover:bg-slate-300 dark:hover:bg-slate-600" title="Bantuan Pintasan">❓</button>
           </div>
 
           <!-- Studio Toolbar Controls -->
@@ -156,17 +156,14 @@
               </optgroup>
             </select>
 
-            <!-- Auto Layout & Generator Pas Foto -->
             <button onclick="autoLayoutGrid()" title="Susun seluruh foto bentuk Grid" class="bg-blue-600 hover:bg-blue-500 text-white px-2 py-1.5 rounded-lg text-xs font-bold transition">🧩 Auto Grid</button>
             <button onclick="generatePasFotoPacket()" title="Buat Lembaran Pas Foto Campur (3x4 & 4x6)" class="bg-indigo-600 hover:bg-indigo-500 text-white px-2 py-1.5 rounded-lg text-xs font-bold transition">📸 Paket Pas Foto</button>
 
             <div class="h-4 w-px bg-slate-300 dark:bg-slate-700 mx-0.5"></div>
 
-            <!-- Tambah Gambar / Warna BG -->
             <button onclick="document.getElementById('extraImgInput').click()" title="Tambah foto/dokumen lain dari laptop/HP" class="bg-emerald-600 hover:bg-emerald-500 text-white px-2 py-1.5 rounded-lg text-xs font-bold transition">➕ Media</button>
             <input type="file" id="extraImgInput" accept="image/*,.pdf" class="hidden" onchange="tambahGambarEkstra(event)">
 
-            <!-- Ganti BG Pas Foto -->
             <select onchange="setCanvasBgColor(this.value)" class="bg-white dark:bg-slate-800 text-xs text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 rounded-lg px-2 py-1.5 font-semibold focus:outline-none">
               <option value="#ffffff">🎨 BG: Putih</option>
               <option value="#d00000">🔴 BG: Merah Resmi</option>
@@ -176,11 +173,8 @@
 
             <div class="h-4 w-px bg-slate-300 dark:bg-slate-700 mx-0.5"></div>
 
-            <!-- Flip / Rotasi -->
             <button onclick="flipImage('h')" title="Cermin Horizontal (Untuk Sablon/Stiker)" class="bg-white dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 px-2 py-1.5 rounded-lg text-xs font-bold transition">↔️ Flip H</button>
             <button onclick="rotateImage(90)" title="Putar 90 Derajat" class="bg-white dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 px-2 py-1.5 rounded-lg text-xs font-bold transition">🔄 Putar</button>
-
-            <!-- Filter -->
             <select id="filterSelect" onchange="applyImageFilter(this.value)" class="bg-white dark:bg-slate-800 text-xs text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 rounded-lg px-2 py-1.5 font-semibold focus:outline-none">
               <option value="none">Filter: Normal</option>
               <option value="grayscale">🏁 B&W Hitam Putih</option>
@@ -188,16 +182,18 @@
               <option value="bright">☀️ Terang +20%</option>
             </select>
 
-            <!-- Tools Edit & Text -->
-            <button id="btn-mulai-potong" onclick="mulaiPotong()" class="bg-purple-600 hover:bg-purple-500 text-white px-2 py-1.5 rounded-lg text-xs font-bold transition">✂️ Potong</button>
-            <button id="btn-terapkan-potong" onclick="terapkanPotong()" class="hidden bg-emerald-600 text-white px-2 py-1.5 rounded-lg text-xs font-bold">✅ Ya</button>
-            <button id="btn-batal-potong" onclick="batalPotong()" class="hidden bg-rose-600 text-white px-2 py-1.5 rounded-lg text-xs font-bold">❌ Batal</button>
-
-            <button onclick="tambahTeks()" title="Tambah Teks / Watermark" class="bg-amber-600 hover:bg-amber-500 text-white px-2 py-1.5 rounded-lg text-xs font-bold transition">🔤 Teks</button>
+            <!-- Tombol Watermark Instan -->
+            <button onclick="pasangWatermark()" title="Beri cap Draft/Copy otomatis" class="bg-sky-600 hover:bg-sky-500 text-white px-2 py-1.5 rounded-lg text-xs font-bold transition">🔏 Cap/Watermark</button>
 
             <div class="h-4 w-px bg-slate-300 dark:bg-slate-700 mx-0.5"></div>
 
-            <!-- Undo / Redo / Hapus -->
+            <button id="btn-mulai-potong" onclick="mulaiPotong()" class="bg-purple-600 hover:bg-purple-500 text-white px-2 py-1.5 rounded-lg text-xs font-bold transition">✂️ Potong</button>
+            <button id="btn-terapkan-potong" onclick="terapkanPotong()" class="hidden bg-emerald-600 text-white px-2 py-1.5 rounded-lg text-xs font-bold">✅ Ya</button>
+            <button id="btn-batal-potong" onclick="batalPotong()" class="hidden bg-rose-600 text-white px-2 py-1.5 rounded-lg text-xs font-bold">❌ Batal</button>
+            <button onclick="tambahTeks()" title="Tambah Teks Bebas" class="bg-amber-600 hover:bg-amber-500 text-white px-2 py-1.5 rounded-lg text-xs font-bold transition">🔤 Teks</button>
+
+            <div class="h-4 w-px bg-slate-300 dark:bg-slate-700 mx-0.5"></div>
+
             <button onclick="undo()" title="Undo (Ctrl+Z)" class="bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 px-2 py-1.5 rounded-lg text-xs font-bold">↩️</button>
             <button onclick="redo()" title="Redo (Ctrl+Y)" class="bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 px-2 py-1.5 rounded-lg text-xs font-bold">↪️</button>
             <button onclick="hapusGambarAktif()" title="Hapus (Del)" class="bg-rose-600/20 hover:bg-rose-600/40 text-rose-500 border border-rose-500/30 px-2 py-1.5 rounded-lg text-xs font-bold transition">🗑️</button>
@@ -214,14 +210,18 @@
         <!-- Editor Footer Actions & Controls -->
         <div class="bg-slate-100 dark:bg-slate-800 p-3 border-t border-slate-200 dark:border-slate-700 flex justify-between items-center flex-wrap gap-2">
           <div class="flex items-center gap-3 text-xs">
-            <!-- Toggle Bleed Area Line -->
+            
+            <label class="flex items-center gap-1.5 cursor-pointer text-slate-600 dark:text-slate-300 font-semibold select-none">
+              <input type="checkbox" id="toggleGrid" onchange="toggleGridLines()" class="rounded text-indigo-600 focus:ring-0">
+              📐 Grid Bantuan
+            </label>
+            
             <label class="flex items-center gap-1.5 cursor-pointer text-slate-600 dark:text-slate-300 font-semibold select-none">
               <input type="checkbox" id="toggleBleed" onchange="toggleBleedLines()" class="rounded text-indigo-600 focus:ring-0">
-              📏 Garis Potong (Bleed Line)
+              📏 Bleed Line
             </label>
 
-            <!-- Slider Opasitas Objek -->
-            <div class="flex items-center gap-1.5 text-slate-600 dark:text-slate-300 font-semibold">
+            <div class="flex items-center gap-1.5 text-slate-600 dark:text-slate-300 font-semibold border-l border-slate-300 dark:border-slate-600 pl-3 ml-1">
               <span>Opasitas:</span>
               <input type="range" id="opacitySlider" min="0.1" max="1" step="0.1" value="1" oninput="changeOpacity(this.value)" class="w-20">
             </div>
@@ -231,7 +231,13 @@
             <button onclick="ratakanTengah()" class="bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 text-xs px-2 py-1 rounded font-bold">Rata Tengah</button>
           </div>
 
-          <div class="flex gap-2">
+          <div class="flex gap-2 items-center">
+            
+            <!-- Widget Info Dimensi Objek (SMART DIMENSION) -->
+            <div id="dimension-info" class="bg-sky-100 dark:bg-sky-900/30 text-sky-700 dark:text-sky-400 border border-sky-300 dark:border-sky-800 px-3 py-1.5 rounded-lg text-[11px] font-bold shadow-inner mr-2 transition-all">
+              📐 Canvas: 750 x 1060 px
+            </div>
+
             <button onclick="downloadCanvasImage()" class="bg-purple-600 hover:bg-purple-500 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1">💾 Simpan PNG</button>
             <button onclick="tutupEditor()" class="bg-slate-300 dark:bg-slate-700 hover:bg-slate-400 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-200 px-4 py-2 rounded-xl text-xs font-bold transition">Tutup</button>
             <button onclick="cetakLangsung()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2 rounded-xl text-xs font-bold shadow-lg shadow-emerald-600/20 transition flex items-center gap-1.5">🖨️ Cetak Dokumen</button>
@@ -247,10 +253,9 @@
     <div id="toast" class="fixed bottom-5 right-5 bg-indigo-600 text-white px-4 py-2.5 rounded-xl text-xs font-bold shadow-2xl opacity-0 pointer-events-none transition-all duration-300 transform translate-y-2 z-50"></div>
 
     <script>
-      // Konfigurasi Worker PDF.js
       pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
 
-      let canvas = new fabric.Canvas("collageCanvas");
+      let canvas = new fabric.Canvas("collageCanvas", { preserveObjectStacking: true });
       let currentEditingId = null;
       let globalQueueData = [];
       let globalHistoryData = [];
@@ -259,17 +264,39 @@
       let cropRect = null;
       let currentImageToCrop = null;
       let bleedLineGroup = null;
+      let backgroundGridGroup = null;
 
-      // History Stack untuk Undo / Redo
       let canvasStateStack = [];
       let canvasRedoStack = [];
       let isStateLocked = false;
 
-      // Inisialisasi Ukuran Canvas Default (A4 Portrait)
       canvas.setWidth(750);
       canvas.setHeight(1060);
 
-      // Listener simpan State Canvas
+      // --- SMART DIMENSION VIEWER LOGIC ---
+      function updateDimensionInfo() {
+        let activeObj = canvas.getActiveObject();
+        if (activeObj) {
+            let w = Math.round(activeObj.getScaledWidth());
+            let h = Math.round(activeObj.getScaledHeight());
+            document.getElementById("dimension-info").innerHTML = `🎯 Objek: ${w} x ${h} px`;
+            document.getElementById("dimension-info").className = "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-800 px-3 py-1.5 rounded-lg text-[11px] font-bold shadow-inner mr-2 transition-all";
+        } else {
+            resetDimensionInfo();
+        }
+      }
+
+      function resetDimensionInfo() {
+        document.getElementById("dimension-info").innerHTML = `📐 Canvas: ${canvas.width} x ${canvas.height} px`;
+        document.getElementById("dimension-info").className = "bg-sky-100 dark:bg-sky-900/30 text-sky-700 dark:text-sky-400 border border-sky-300 dark:border-sky-800 px-3 py-1.5 rounded-lg text-[11px] font-bold shadow-inner mr-2 transition-all";
+      }
+
+      canvas.on('selection:created', updateDimensionInfo);
+      canvas.on('selection:updated', updateDimensionInfo);
+      canvas.on('selection:cleared', resetDimensionInfo);
+      canvas.on('object:scaling', updateDimensionInfo);
+      // ------------------------------------
+
       canvas.on('object:modified', saveState);
       canvas.on('object:added', saveState);
       canvas.on('object:removed', saveState);
@@ -304,7 +331,6 @@
         }
       }
 
-      // Pintasan Keyboard Pro
       document.addEventListener('keydown', function(e) {
         if (document.getElementById('editorModal').classList.contains('hidden')) return;
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
@@ -329,7 +355,6 @@
         }
       });
 
-      // Fitur Theme Toggle (Day & Night Mode)
       function initTheme() {
         if (localStorage.getItem('theme') === 'light') {
           document.documentElement.classList.remove('dark');
@@ -504,7 +529,46 @@
       setInterval(loadData, 4000);
       loadData();
 
-      // Fitur Ubah Ukuran Canvas Studio Lengkap
+      function toggleGridLines(forceState) {
+        let checked = forceState !== undefined ? forceState : document.getElementById("toggleGrid").checked;
+        if (backgroundGridGroup) canvas.remove(backgroundGridGroup);
+
+        if (checked) {
+          let lines = [];
+          let gridSize = 50; 
+          let strokeColor = 'rgba(148, 163, 184, 0.4)'; 
+          
+          for (let i = 0; i < (canvas.width / gridSize); i++) {
+            lines.push(new fabric.Line([i * gridSize, 0, i * gridSize, canvas.height], { stroke: strokeColor, selectable: false }));
+          }
+          for (let i = 0; i < (canvas.height / gridSize); i++) {
+            lines.push(new fabric.Line([0, i * gridSize, canvas.width, i * gridSize], { stroke: strokeColor, selectable: false }));
+          }
+          backgroundGridGroup = new fabric.Group(lines, { selectable: false, evented: false });
+          canvas.add(backgroundGridGroup);
+          backgroundGridGroup.sendToBack();
+        }
+        canvas.renderAll();
+      }
+
+      function pasangWatermark() {
+        let txt = new fabric.Text("DRAFT / COPY", {
+            fontSize: 70, 
+            fill: 'rgba(225, 29, 72, 0.25)', 
+            angle: -45, 
+            originX: 'center', 
+            originY: 'center',
+            left: canvas.width / 2, 
+            top: canvas.height / 2,
+            fontWeight: '900',
+            fontFamily: 'sans-serif'
+        });
+        canvas.add(txt);
+        canvas.renderAll();
+        saveState();
+        showToast("Watermark DRAFT berhasil dipasang.");
+      }
+
       function changeCanvasSize() {
         const val = document.getElementById("pageSizeSelect").value;
         let w = 750, h = 1060;
@@ -532,7 +596,12 @@
         canvas.setWidth(w);
         canvas.setHeight(h);
         canvas.renderAll();
+        
+        resetDimensionInfo(); // Update info UI saat ukuran kertas berubah
+        
         if (document.getElementById("toggleBleed").checked) toggleBleedLines(true);
+        if (document.getElementById("toggleGrid").checked) toggleGridLines(true);
+        
         showToast(`Ukuran canvas: ${w}x${h} px`);
       }
 
@@ -541,7 +610,6 @@
         saveState();
       }
 
-      // Auto Layout Grid
       function autoLayoutGrid() {
         let objects = canvas.getObjects().filter(o => o.type === 'image' || o.type === 'group');
         if (objects.length === 0) return;
@@ -566,7 +634,6 @@
         showToast("Auto Grid berhasil disusun.");
       }
 
-      // Generator Paket Pas Foto Lembaran Campur (Instan)
       function generatePasFotoPacket() {
         let images = canvas.getObjects().filter(o => o.type === 'image');
         if (images.length === 0) {
@@ -575,7 +642,6 @@
         }
         let baseImg = images[0];
         
-        // Ubah canvas ke A4 Portrait
         document.getElementById("pageSizeSelect").value = "a4_p";
         changeCanvasSize();
         canvas.clear();
@@ -615,12 +681,11 @@
         showToast("📸 Paket Pas Foto (4x 3x4 + 4x 4x6) dibuat.");
       }
 
-      // Fungsi untuk mengonversi PDF page ke dataURL (Bantuan rendering lokal)
       function renderPDFToDataURL(arrayBuffer) {
         return pdfjsLib.getDocument({data: arrayBuffer}).promise
           .then(pdf => pdf.getPage(1))
           .then(page => {
-            const viewport = page.getViewport({ scale: 2.0 }); // Render HD
+            const viewport = page.getViewport({ scale: 2.0 }); 
             const tempCanvas = document.createElement("canvas");
             const ctx = tempCanvas.getContext("2d");
             tempCanvas.height = viewport.height;
@@ -715,7 +780,7 @@
         if (bleedLineGroup) canvas.remove(bleedLineGroup);
 
         if (checked) {
-          let margin = 20; // 20px bleed safety area
+          let margin = 20;
           let rect = new fabric.Rect({
             left: margin, top: margin,
             width: canvas.width - (margin * 2),
@@ -735,12 +800,12 @@
       }
 
       function tambahTeks() {
-        let textVal = prompt("Masukkan Teks / Watermark:", "LUNAS");
+        let textVal = prompt("Masukkan Teks:", "Tulisan");
         if (!textVal) return;
         
         let txt = new fabric.IText(textVal, {
           left: canvas.width / 2 - 50, top: canvas.height / 2 - 20,
-          fontFamily: 'sans-serif', fill: '#e11d48', fontSize: 36, fontWeight: 'bold'
+          fontFamily: 'sans-serif', fill: '#0f172a', fontSize: 36, fontWeight: 'bold'
         });
         canvas.add(txt);
         canvas.setActiveObject(txt);
@@ -769,6 +834,7 @@
         if (!activeObj) return;
         activeObj.viewportCenter();
         canvas.renderAll();
+        saveState();
       }
 
       function mulaiPotong() {
@@ -818,7 +884,6 @@
         document.getElementById('btn-batal-potong').classList.add('hidden');
       }
 
-      // INTEGRASI PEMBACAAN DOKUMEN & FOTO KE DALAM EDITOR
       function bukaEditor(id) {
         currentEditingId = id;
         resetPotongUI();
@@ -830,6 +895,9 @@
 
         document.getElementById("editorModal").classList.remove("hidden");
         document.getElementById("editing-info").innerText = `ORDER #${order.no_order} — ${order.nama.toUpperCase()}`;
+        
+        document.getElementById("pageSizeSelect").value = "a4_p";
+        changeCanvasSize();
 
         canvas.clear();
         canvas.setBackgroundColor("#ffffff", canvas.renderAll.bind(canvas));
@@ -838,7 +906,6 @@
           let ext = filename.split('.').pop().toLowerCase();
           
           if (['jpg', 'jpeg', 'png', 'webp'].includes(ext)) {
-            // PROSES FOTO SEPERTI BIASA
             fetch("/static/uploads/" + filename)
               .then(res => res.blob())
               .then(blob => {
@@ -858,7 +925,6 @@
               });
 
           } else if (ext === 'pdf') {
-            // PROSES FILE PDF MENGGUNAKAN PDF.JS (DIRENDER KE CANVAS)
             fetch("/static/uploads/" + filename)
               .then(res => res.arrayBuffer())
               .then(buffer => renderPDFToDataURL(buffer))
@@ -874,8 +940,6 @@
               }).catch(err => console.error("Gagal load PDF:", err));
               
           } else if (['doc', 'docx', 'xls', 'xlsx'].includes(ext)) {
-            // SMART PLACEHOLDER UNTUK DOKUMEN WORD/EXCEL
-            // Menggambar ikon dokumen secara visual di canvas agar bisa dipindahkan/digabung
             let docRect = new fabric.Rect({
                 width: 180, height: 240, fill: '#f8fafc', stroke: '#94a3b8', 
                 strokeWidth: 2, rx: 8, ry: 8, originX: 'center', originY: 'center'
@@ -919,6 +983,7 @@
 
       function downloadCanvasImage() {
         if (bleedLineGroup) canvas.remove(bleedLineGroup);
+        if (backgroundGridGroup) canvas.remove(backgroundGridGroup);
         canvas.discardActiveObject();
         canvas.renderAll();
         const dataURL = canvas.toDataURL({ format: "png", quality: 1.0 });
@@ -929,14 +994,13 @@
         showToast("Gambar PNG diunduh.");
       }
 
-      // Cetak Langsung dengan Header Minimalis & QR Code Barcode
       function cetakLangsung() {
         if (bleedLineGroup) canvas.remove(bleedLineGroup);
+        if (backgroundGridGroup) canvas.remove(backgroundGridGroup);
         const order = globalQueueData.find((q) => q.id === currentEditingId) || globalHistoryData.find((q) => q.id === currentEditingId);
         canvas.discardActiveObject(); 
         canvas.renderAll();
         
-        // Render QR Code
         const qrContainer = document.getElementById("qrcode-hidden");
         qrContainer.innerHTML = "";
         const orderNoText = order ? order.no_order : "STUDIO";
