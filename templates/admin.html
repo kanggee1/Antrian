@@ -3,14 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Panel Admin - Professional Print Management</title>
+    <title>Panel Admin - Professional Print Studio Pro v4.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-      tailwind.config = {
-        darkMode: 'class',
-      }
+      tailwind.config = { darkMode: 'class' }
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+    <!-- Library QR Code Generator -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
       .canvas-container { margin: 0 auto !important; max-width: 100% !important; }
       .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -24,9 +24,9 @@
       <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4 bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-md transition-colors">
         <div class="text-center md:text-left">
           <h1 class="text-xl md:text-2xl font-black tracking-tight text-slate-900 dark:text-white flex items-center gap-2 justify-center md:justify-start">
-            🖨️ Management Cetak <span class="text-xs font-semibold bg-blue-500/20 text-blue-600 dark:text-blue-400 px-2.5 py-1 rounded-full border border-blue-500/30">Studio Pro v3.0</span>
+            🖨️ Management Cetak <span class="text-xs font-bold bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 px-2.5 py-1 rounded-full border border-indigo-500/30">Studio Ultimate v4.0</span>
           </h1>
-          <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Control Panel & Studio Editor Canvas</p>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Control Panel & Studio Editor Canvas Percetakan</p>
         </div>
         <div class="flex flex-wrap justify-center md:justify-end items-center gap-2.5">
           <!-- Switch Theme Mode -->
@@ -121,89 +121,109 @@
     </div>
 
     <!-- Advanced Studio Editor Modal -->
-    <div id="editorModal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center z-50 p-2 md:p-4">
+    <div id="editorModal" class="hidden fixed inset-0 bg-slate-950/85 backdrop-blur-md flex items-center justify-center z-50 p-2 md:p-4">
       <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 w-full max-w-7xl h-[95vh] rounded-2xl flex flex-col shadow-2xl overflow-hidden">
         
         <!-- Editor Header Toolbar -->
-        <div class="bg-slate-100 dark:bg-slate-800 p-3 md:p-4 border-b border-slate-200 dark:border-slate-700 flex flex-wrap items-center justify-between gap-3">
+        <div class="bg-slate-100 dark:bg-slate-800 p-3 border-b border-slate-200 dark:border-slate-700 flex flex-wrap items-center justify-between gap-2.5">
           <div>
-            <span class="text-[10px] font-bold text-blue-500 uppercase tracking-wider">Canvas Studio Pro</span>
+            <span class="text-[10px] font-bold text-indigo-500 uppercase tracking-wider">Canvas Studio Ultimate</span>
             <h3 id="editing-info" class="text-xs md:text-sm font-extrabold text-slate-800 dark:text-white">ORDER #000</h3>
           </div>
 
           <!-- Studio Toolbar Controls -->
-          <div class="flex flex-wrap items-center gap-1.5 bg-slate-200/60 dark:bg-slate-900/80 p-1.5 rounded-xl border border-slate-300 dark:border-slate-700/80">
-            <!-- Pilihan Ukuran Canvas Lengkap -->
-            <select id="pageSizeSelect" onchange="changeCanvasSize()" class="bg-white dark:bg-slate-800 text-xs text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 rounded-lg px-2 py-1.5 font-semibold focus:outline-none focus:border-blue-500">
-              <optgroup label="Kertas Standar">
+          <div class="flex flex-wrap items-center gap-1.5 bg-slate-200/70 dark:bg-slate-900/80 p-1.5 rounded-xl border border-slate-300 dark:border-slate-700/80">
+            <!-- Preset Ukuran -->
+            <select id="pageSizeSelect" onchange="changeCanvasSize()" class="bg-white dark:bg-slate-800 text-xs text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 rounded-lg px-2 py-1.5 font-semibold focus:outline-none focus:border-indigo-500">
+              <optgroup label="Standard Paper">
                 <option value="a4_p" selected>📄 A4 Portrait (21x29.7cm)</option>
                 <option value="a4_l">📄 A4 Landscape (29.7x21cm)</option>
                 <option value="a3_p">📄 A3 Portrait (29.7x42cm)</option>
                 <option value="a3_l">📄 A3 Landscape (42x29.7cm)</option>
                 <option value="a5_p">📄 A5 Portrait (14.8x21cm)</option>
-                <option value="a5_l">📄 A5 Landscape (21x14.8cm)</option>
               </optgroup>
-              <optgroup label="Foto & Pas Foto">
-                <option value="photo_4r">🖼️ Cetak Foto 4R (4x6 inc)</option>
-                <option value="photo_3r">🖼️ Cetak Foto 3R (3.5x5 inc)</option>
+              <optgroup label="Pas Foto & Photo Sheet">
+                <option value="photo_4r">🖼️ Cetak Foto 4R</option>
                 <option value="pas_2x3">🆔 Pas Foto 2x3 cm</option>
                 <option value="pas_3x4">🆔 Pas Foto 3x4 cm</option>
                 <option value="pas_4x6">🆔 Pas Foto 4x6 cm</option>
               </optgroup>
-              <optgroup label="Lainnya">
-                <option value="square">🔲 Square / Persegi (1:1)</option>
-                <option value="custom">✏️ Ukuran Custom (px)</option>
+              <optgroup label="Custom">
+                <option value="square">🔲 Square (1:1)</option>
+                <option value="custom">✏️ Custom Pixel</option>
               </optgroup>
             </select>
 
+            <!-- Auto Layout & Generator Pas Foto -->
+            <button onclick="autoLayoutGrid()" title="Susun seluruh foto bentuk Grid" class="bg-blue-600 hover:bg-blue-500 text-white px-2 py-1.5 rounded-lg text-xs font-bold transition">🧩 Auto Grid</button>
+            <button onclick="generatePasFotoPacket()" title="Buat Lembaran Pas Foto Campur (3x4 & 4x6)" class="bg-indigo-600 hover:bg-indigo-500 text-white px-2 py-1.5 rounded-lg text-xs font-bold transition">📸 Paket Pas Foto</button>
+
             <div class="h-4 w-px bg-slate-300 dark:bg-slate-700 mx-0.5"></div>
 
-            <!-- Kolase & Layout -->
-            <button onclick="autoLayoutGrid()" title="Susun otomatis seluruh gambar berbentuk Grid" class="bg-blue-600 hover:bg-blue-500 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1">🧩 Auto Grid</button>
-            <button onclick="document.getElementById('extraImgInput').click()" title="Tambah gambar lain dari perangkat" class="bg-emerald-600 hover:bg-emerald-500 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition">➕ Gambar</button>
+            <!-- Tambah Gambar / Warna BG -->
+            <button onclick="document.getElementById('extraImgInput').click()" title="Tambah foto lain dari laptop/HP" class="bg-emerald-600 hover:bg-emerald-500 text-white px-2 py-1.5 rounded-lg text-xs font-bold transition">➕ Foto</button>
             <input type="file" id="extraImgInput" accept="image/*" class="hidden" onchange="tambahGambarEkstra(event)">
 
-            <div class="h-4 w-px bg-slate-300 dark:bg-slate-700 mx-0.5"></div>
-
-            <!-- Manipulasi Gambar -->
-            <button onclick="rotateImage(90)" title="Putar 90 Derajat" class="bg-white dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 px-2 py-1.5 rounded-lg text-xs font-bold transition">🔄 Putar</button>
-            <button onclick="duplikatObjek()" title="Duplikat Gambar/Objek Terpilih" class="bg-white dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 px-2 py-1.5 rounded-lg text-xs font-bold transition">👯 Duplikat</button>
-            
-            <!-- Filter -->
-            <select id="filterSelect" onchange="applyImageFilter(this.value)" class="bg-white dark:bg-slate-800 text-xs text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 rounded-lg px-2 py-1.5 font-semibold focus:outline-none">
-              <option value="none">🎨 Filter: Normal</option>
-              <option value="grayscale">🏁 Hitam Putih (B&W)</option>
-              <option value="sepia">📜 Sepia Vintage</option>
-              <option value="bright">☀️ Terang (+20%)</option>
+            <!-- Ganti BG Pas Foto -->
+            <select onchange="setCanvasBgColor(this.value)" class="bg-white dark:bg-slate-800 text-xs text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 rounded-lg px-2 py-1.5 font-semibold focus:outline-none">
+              <option value="#ffffff">🎨 BG: Putih</option>
+              <option value="#d00000">🔴 BG: Merah Resmi</option>
+              <option value="#0055ff">🔵 BG: Biru Resmi</option>
+              <option value="#000000">⚫ BG: Hitam</option>
             </select>
 
             <div class="h-4 w-px bg-slate-300 dark:bg-slate-700 mx-0.5"></div>
 
-            <!-- Crop & Tool Tambahan -->
-            <button id="btn-mulai-potong" onclick="mulaiPotong()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition">✂️ Potong</button>
-            <button id="btn-terapkan-potong" onclick="terapkanPotong()" class="hidden bg-emerald-600 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold">✅ Ya</button>
-            <button id="btn-batal-potong" onclick="batalPotong()" class="hidden bg-rose-600 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold">❌ Batal</button>
+            <!-- Flip / Rotasi -->
+            <button onclick="flipImage('h')" title="Cermin Horizontal (Untuk Sablon/Stiker)" class="bg-white dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 px-2 py-1.5 rounded-lg text-xs font-bold transition">↔️ Flip H</button>
+            <button onclick="rotateImage(90)" title="Putar 90 Derajat" class="bg-white dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 px-2 py-1.5 rounded-lg text-xs font-bold transition">🔄 Putar</button>
 
-            <button onclick="tambahTeks()" title="Tambah Teks / Watermark" class="bg-amber-600 hover:bg-amber-500 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition">🔤 Teks</button>
+            <!-- Filter -->
+            <select id="filterSelect" onchange="applyImageFilter(this.value)" class="bg-white dark:bg-slate-800 text-xs text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 rounded-lg px-2 py-1.5 font-semibold focus:outline-none">
+              <option value="none">Filter: Normal</option>
+              <option value="grayscale">🏁 B&W Hitam Putih</option>
+              <option value="sepia">📜 Sepia</option>
+              <option value="bright">☀️ Terang +20%</option>
+            </select>
+
+            <!-- Tools Edit & Text -->
+            <button id="btn-mulai-potong" onclick="mulaiPotong()" class="bg-purple-600 hover:bg-purple-500 text-white px-2 py-1.5 rounded-lg text-xs font-bold transition">✂️ Potong</button>
+            <button id="btn-terapkan-potong" onclick="terapkanPotong()" class="hidden bg-emerald-600 text-white px-2 py-1.5 rounded-lg text-xs font-bold">✅ Ya</button>
+            <button id="btn-batal-potong" onclick="batalPotong()" class="hidden bg-rose-600 text-white px-2 py-1.5 rounded-lg text-xs font-bold">❌ Batal</button>
+
+            <button onclick="tambahTeks()" title="Tambah Teks / Watermark" class="bg-amber-600 hover:bg-amber-500 text-white px-2 py-1.5 rounded-lg text-xs font-bold transition">🔤 Teks</button>
+
+            <div class="h-4 w-px bg-slate-300 dark:bg-slate-700 mx-0.5"></div>
 
             <!-- Undo / Redo / Hapus -->
-            <button onclick="undo()" title="Urungkan" class="bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 px-2 py-1.5 rounded-lg text-xs font-bold">↩️</button>
-            <button onclick="redo()" title="Ulangi" class="bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 px-2 py-1.5 rounded-lg text-xs font-bold">↪️</button>
-            <button onclick="hapusGambarAktif()" title="Hapus objek terpilih" class="bg-rose-600/20 hover:bg-rose-600/40 text-rose-500 border border-rose-500/30 px-2 py-1.5 rounded-lg text-xs font-bold transition">🗑️</button>
+            <button onclick="undo()" title="Undo (Ctrl+Z)" class="bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 px-2 py-1.5 rounded-lg text-xs font-bold">↩️</button>
+            <button onclick="redo()" title="Redo (Ctrl+Y)" class="bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 px-2 py-1.5 rounded-lg text-xs font-bold">↪️</button>
+            <button onclick="hapusGambarAktif()" title="Hapus (Del)" class="bg-rose-600/20 hover:bg-rose-600/40 text-rose-500 border border-rose-500/30 px-2 py-1.5 rounded-lg text-xs font-bold transition">🗑️</button>
           </div>
         </div>
 
         <!-- Canvas Viewport -->
         <div class="flex-grow bg-slate-200 dark:bg-slate-950 p-4 flex items-center justify-center overflow-auto relative">
-          <div id="canvas-wrapper" class="shadow-2xl border border-slate-300 dark:border-slate-800 rounded bg-white">
+          <div id="canvas-wrapper" class="shadow-2xl border border-slate-300 dark:border-slate-800 rounded bg-white relative">
              <canvas id="collageCanvas"></canvas>
           </div>
         </div>
 
-        <!-- Editor Footer Actions -->
-        <div class="bg-slate-100 dark:bg-slate-800 p-3 md:p-4 border-t border-slate-200 dark:border-slate-700 flex justify-between items-center flex-wrap gap-2">
-          <div class="flex items-center gap-2">
-            <span class="text-[11px] text-slate-500 dark:text-slate-400">Layer:</span>
+        <!-- Editor Footer Actions & Controls -->
+        <div class="bg-slate-100 dark:bg-slate-800 p-3 border-t border-slate-200 dark:border-slate-700 flex justify-between items-center flex-wrap gap-2">
+          <div class="flex items-center gap-3 text-xs">
+            <!-- Toggle Bleed Area Line -->
+            <label class="flex items-center gap-1.5 cursor-pointer text-slate-600 dark:text-slate-300 font-semibold select-none">
+              <input type="checkbox" id="toggleBleed" onchange="toggleBleedLines()" class="rounded text-indigo-600 focus:ring-0">
+              📏 Garis Potong (Bleed Line)
+            </label>
+
+            <!-- Slider Opasitas Objek -->
+            <div class="flex items-center gap-1.5 text-slate-600 dark:text-slate-300 font-semibold">
+              <span>Opasitas:</span>
+              <input type="range" id="opacitySlider" min="0.1" max="1" step="0.1" value="1" oninput="changeOpacity(this.value)" class="w-20">
+            </div>
+
             <button onclick="pindahLayer('front')" class="bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 text-xs px-2 py-1 rounded font-bold">Ke Depan</button>
             <button onclick="pindahLayer('back')" class="bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 text-xs px-2 py-1 rounded font-bold">Ke Belakang</button>
             <button onclick="ratakanTengah()" class="bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 text-xs px-2 py-1 rounded font-bold">Rata Tengah</button>
@@ -218,8 +238,11 @@
       </div>
     </div>
 
+    <!-- Hidden Container untuk Render QR Code saat Print -->
+    <div id="qrcode-hidden" class="hidden"></div>
+
     <!-- Notification Toast -->
-    <div id="toast" class="fixed bottom-5 right-5 bg-blue-600 text-white px-4 py-2.5 rounded-xl text-xs font-bold shadow-2xl opacity-0 pointer-events-none transition-all duration-300 transform translate-y-2 z-50"></div>
+    <div id="toast" class="fixed bottom-5 right-5 bg-indigo-600 text-white px-4 py-2.5 rounded-xl text-xs font-bold shadow-2xl opacity-0 pointer-events-none transition-all duration-300 transform translate-y-2 z-50"></div>
 
     <script>
       let canvas = new fabric.Canvas("collageCanvas");
@@ -230,8 +253,9 @@
       
       let cropRect = null;
       let currentImageToCrop = null;
+      let bleedLineGroup = null;
 
-      // History Undo/Redo State
+      // History Stack untuk Undo / Redo
       let canvasStateStack = [];
       let canvasRedoStack = [];
       let isStateLocked = false;
@@ -240,7 +264,7 @@
       canvas.setWidth(750);
       canvas.setHeight(1060);
 
-      // Event listener simpan state canvas untuk Undo/Redo
+      // Listener simpan State Canvas
       canvas.on('object:modified', saveState);
       canvas.on('object:added', saveState);
       canvas.on('object:removed', saveState);
@@ -274,6 +298,31 @@
           });
         }
       }
+
+      // Pintasan Keyboard Pro
+      document.addEventListener('keydown', function(e) {
+        if (document.getElementById('editorModal').classList.contains('hidden')) return;
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+        let activeObj = canvas.getActiveObject();
+        if (e.key === 'Delete' || e.key === 'Backspace') {
+          hapusGambarAktif();
+        } else if (e.ctrlKey && e.key.toLowerCase() === 'z') {
+          e.preventDefault(); undo();
+        } else if (e.ctrlKey && e.key.toLowerCase() === 'y') {
+          e.preventDefault(); redo();
+        } else if (activeObj && ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+          e.preventDefault();
+          let step = e.shiftKey ? 10 : 1;
+          if (e.key === 'ArrowUp') activeObj.top -= step;
+          if (e.key === 'ArrowDown') activeObj.top += step;
+          if (e.key === 'ArrowLeft') activeObj.left -= step;
+          if (e.key === 'ArrowRight') activeObj.left += step;
+          activeObj.setCoords();
+          canvas.renderAll();
+          saveState();
+        }
+      });
 
       // Fitur Theme Toggle (Day & Night Mode)
       function initTheme() {
@@ -378,7 +427,7 @@
                 <td class="px-4 py-3">${generateFileHTML(item.filenames)}</td>
                 <td class="px-4 py-3 text-center">
                     <div class="flex items-center justify-center gap-1.5">
-                        <button onclick="bukaEditor(${item.id})" class="bg-amber-500/20 hover:bg-amber-500/30 text-amber-600 dark:text-amber-300 border border-amber-500/30 px-2.5 py-1.5 rounded-lg text-xs font-bold transition">🎨 Studio</button>
+                        <button onclick="bukaEditor(${item.id})" class="bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-600 dark:text-indigo-300 border border-indigo-500/30 px-2.5 py-1.5 rounded-lg text-xs font-bold transition">🎨 Studio</button>
                         <button onclick="updateStatus(${item.id}, 'Selesai')" class="bg-emerald-600 hover:bg-emerald-500 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition shadow-sm">✅ Selesai</button>
                         <button onclick="updateStatus(${item.id}, 'Dilewati')" class="bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 px-2.5 py-1.5 rounded-lg text-xs font-bold transition">⏭️ Lewati</button>
                     </div>
@@ -435,17 +484,15 @@
       }
 
       function hapusRiwayat(id) {
-        if (confirm("Peringatan: Yakin ingin menghapus data riwayat ini beserta file dokumen aslinya secara permanen?")) {
-          fetch(`/api/delete/${id}`, {
-            method: "DELETE",
-          }).then((res) => res.json()).then((res) => {
-            if (res.success) {
-              showToast("🗑️ " + res.message);
-              loadData();
-            } else {
-              alert("Gagal menghapus data.");
-            }
-          });
+        if (confirm("Peringatan: Yakin ingin menghapus data riwayat ini secara permanen?")) {
+          fetch(`/api/delete/${id}`, { method: "DELETE" })
+            .then((res) => res.json())
+            .then((res) => {
+              if (res.success) {
+                showToast("🗑️ " + res.message);
+                loadData();
+              }
+            });
         }
       }
 
@@ -463,30 +510,33 @@
           case "a3_p": w = 1060; h = 1500; break;
           case "a3_l": w = 1500; h = 1060; break;
           case "a5_p": w = 530; h = 750; break;
-          case "a5_l": w = 750; h = 530; break;
           case "photo_4r": w = 600; h = 900; break;
-          case "photo_3r": w = 525; h = 750; break;
           case "pas_2x3": w = 236; h = 354; break;
           case "pas_3x4": w = 354; h = 472; break;
           case "pas_4x6": w = 472; h = 708; break;
           case "square": w = 800; h = 800; break;
           case "custom":
-            let customW = prompt("Masukkan Lebar Canvas (pixel):", "800");
-            let customH = prompt("Masukkan Tinggi Canvas (pixel):", "1000");
+            let customW = prompt("Lebar Canvas (px):", "800");
+            let customH = prompt("Tinggi Canvas (px):", "1000");
             if (customW && customH) {
-              w = parseInt(customW);
-              h = parseInt(customH);
+              w = parseInt(customW); h = parseInt(customH);
             }
             break;
         }
 
         canvas.setWidth(w);
         canvas.setHeight(h);
-        canvas.setBackgroundColor("#ffffff", canvas.renderAll.bind(canvas));
-        showToast(`Ukuran canvas diubah: ${w}x${h} px`);
+        canvas.renderAll();
+        if (document.getElementById("toggleBleed").checked) toggleBleedLines(true);
+        showToast(`Ukuran canvas: ${w}x${h} px`);
       }
 
-      // Laying out images automatically
+      function setCanvasBgColor(color) {
+        canvas.setBackgroundColor(color, canvas.renderAll.bind(canvas));
+        saveState();
+      }
+
+      // Auto Layout Grid
       function autoLayoutGrid() {
         let objects = canvas.getObjects().filter(o => o.type === 'image');
         if (objects.length === 0) return;
@@ -508,7 +558,56 @@
         });
         canvas.renderAll();
         saveState();
-        showToast("Layout grid otomatis berhasil disusun.");
+        showToast("Auto Grid berhasil disusun.");
+      }
+
+      // Generator Paket Pas Foto Lembaran Campur (Instan)
+      function generatePasFotoPacket() {
+        let images = canvas.getObjects().filter(o => o.type === 'image');
+        if (images.length === 0) {
+          alert("Masukkan/muat minimal satu foto terlebih dahulu.");
+          return;
+        }
+        let baseImg = images[0];
+        
+        // Ubah canvas ke A4 Portrait
+        document.getElementById("pageSizeSelect").value = "a4_p";
+        changeCanvasSize();
+        canvas.clear();
+        canvas.setBackgroundColor("#ffffff", canvas.renderAll.bind(canvas));
+
+        let sizes = [
+          { name: "3x4", w: 140, h: 186, count: 4 },
+          { name: "4x6", w: 186, h: 279, count: 4 }
+        ];
+
+        let startX = 40, startY = 40, padding = 20;
+        let currentX = startX, currentY = startY, maxHeightInRow = 0;
+
+        sizes.forEach(sizeGroup => {
+          for (let i = 0; i < sizeGroup.count; i++) {
+            baseImg.clone((cloned) => {
+              cloned.scaleToWidth(sizeGroup.w);
+              cloned.scaleToHeight(sizeGroup.h);
+              
+              if (currentX + sizeGroup.w > canvas.width - 40) {
+                currentX = startX;
+                currentY += maxHeightInRow + padding;
+                maxHeightInRow = 0;
+              }
+
+              cloned.set({ left: currentX, top: currentY });
+              canvas.add(cloned);
+              
+              maxHeightInRow = Math.max(maxHeightInRow, cloned.getScaledHeight());
+              currentX += cloned.getScaledWidth() + padding;
+              canvas.renderAll();
+            });
+          }
+        });
+
+        setTimeout(saveState, 300);
+        showToast("📸 Paket Pas Foto (4x 3x4 + 4x 4x6) dibuat.");
       }
 
       function tambahGambarEkstra(event) {
@@ -524,25 +623,19 @@
             canvas.setActiveObject(img);
             canvas.renderAll();
             saveState();
-            showToast("Gambar baru ditambahkan ke canvas.");
+            showToast("Foto tambahan berhasil dimasukkan.");
           });
         };
         reader.readAsDataURL(file);
       }
 
-      function duplikatObjek() {
+      function flipImage(dir) {
         let activeObj = canvas.getActiveObject();
-        if (!activeObj) {
-          alert("Pilih gambar atau teks yang ingin diduplikat.");
-          return;
-        }
-        activeObj.clone((cloned) => {
-          cloned.set({ left: activeObj.left + 20, top: activeObj.top + 20 });
-          canvas.add(cloned);
-          canvas.setActiveObject(cloned);
-          canvas.renderAll();
-          saveState();
-        });
+        if (!activeObj) return;
+        if (dir === 'h') activeObj.set('flipX', !activeObj.flipX);
+        if (dir === 'v') activeObj.set('flipY', !activeObj.flipY);
+        canvas.renderAll();
+        saveState();
       }
 
       function rotateImage(deg) {
@@ -556,35 +649,59 @@
       function applyImageFilter(filterType) {
         let activeObj = canvas.getActiveObject();
         if (!activeObj || activeObj.type !== 'image') {
-          alert("Pilih gambar terlebih dahulu untuk menerapkan filter.");
+          alert("Pilih foto terlebih dahulu.");
           return;
         }
 
         activeObj.filters = [];
-        if (filterType === 'grayscale') {
-          activeObj.filters.push(new fabric.Image.filters.Grayscale());
-        } else if (filterType === 'sepia') {
-          activeObj.filters.push(new fabric.Image.filters.Sepia());
-        } else if (filterType === 'bright') {
-          activeObj.filters.push(new fabric.Image.filters.Brightness({ brightness: 0.2 }));
-        }
+        if (filterType === 'grayscale') activeObj.filters.push(new fabric.Image.filters.Grayscale());
+        if (filterType === 'sepia') activeObj.filters.push(new fabric.Image.filters.Sepia());
+        if (filterType === 'bright') activeObj.filters.push(new fabric.Image.filters.Brightness({ brightness: 0.2 }));
 
         activeObj.applyFilters();
         canvas.renderAll();
         saveState();
       }
 
+      function changeOpacity(val) {
+        let activeObj = canvas.getActiveObject();
+        if (!activeObj) return;
+        activeObj.set('opacity', parseFloat(val));
+        canvas.renderAll();
+        saveState();
+      }
+
+      function toggleBleedLines(forceState) {
+        let checked = forceState !== undefined ? forceState : document.getElementById("toggleBleed").checked;
+        if (bleedLineGroup) canvas.remove(bleedLineGroup);
+
+        if (checked) {
+          let margin = 20; // 20px bleed safety area
+          let rect = new fabric.Rect({
+            left: margin, top: margin,
+            width: canvas.width - (margin * 2),
+            height: canvas.height - (margin * 2),
+            fill: 'transparent',
+            stroke: '#ef4444',
+            strokeWidth: 1.5,
+            strokeDashArray: [6, 6],
+            selectable: false,
+            evented: false
+          });
+          bleedLineGroup = rect;
+          canvas.add(rect);
+          rect.bringToFront();
+        }
+        canvas.renderAll();
+      }
+
       function tambahTeks() {
-        let textVal = prompt("Masukkan teks / watermark:", "LUNAS");
+        let textVal = prompt("Masukkan Teks / Watermark:", "LUNAS");
         if (!textVal) return;
         
         let txt = new fabric.IText(textVal, {
-          left: canvas.width / 2 - 50,
-          top: canvas.height / 2 - 20,
-          fontFamily: 'sans-serif',
-          fill: '#e11d48',
-          fontSize: 36,
-          fontWeight: 'bold'
+          left: canvas.width / 2 - 50, top: canvas.height / 2 - 20,
+          fontFamily: 'sans-serif', fill: '#e11d48', fontSize: 36, fontWeight: 'bold'
         });
         canvas.add(txt);
         canvas.setActiveObject(txt);
@@ -684,10 +801,7 @@
             jumlahGambar++;
             
             fetch("/static/uploads/" + filename)
-              .then(res => {
-                  if (!res.ok) throw new Error("Gagal mengambil gambar");
-                  return res.blob();
-              })
+              .then(res => res.blob())
               .then(blob => {
                   const reader = new FileReader();
                   reader.onload = function(f) {
@@ -702,16 +816,9 @@
                       });
                   };
                   reader.readAsDataURL(blob);
-              })
-              .catch(err => {
-                  console.error("Error load blob:", err);
               });
           }
         });
-
-        if (order.filenames.length > 0 && jumlahGambar === 0) {
-            alert("⚠️ Perhatian: File yang dikirim adalah Dokumen (PDF/Word). Studio Editor digunakan khusus gambar (JPG/PNG). Gunakan tombol 'Download' untuk mencetak dokumen.");
-        }
       }
 
       function tutupEditor() {
@@ -721,6 +828,7 @@
       }
 
       function downloadCanvasImage() {
+        if (bleedLineGroup) canvas.remove(bleedLineGroup);
         canvas.discardActiveObject();
         canvas.renderAll();
         const dataURL = canvas.toDataURL({ format: "png", quality: 1.0 });
@@ -728,132 +836,76 @@
         link.download = `Studio-Order-${currentEditingId || 'export'}.png`;
         link.href = dataURL;
         link.click();
-        showToast("Gambar berhasil diunduh.");
+        showToast("Gambar PNG diunduh.");
       }
 
-      // Cetak Langsung dengan Header Minimalis & Profesional
+      // Cetak Langsung dengan Header Minimalis & QR Code Barcode
       function cetakLangsung() {
+        if (bleedLineGroup) canvas.remove(bleedLineGroup);
         const order = globalQueueData.find((q) => q.id === currentEditingId) || globalHistoryData.find((q) => q.id === currentEditingId);
         canvas.discardActiveObject(); 
         canvas.renderAll();
         
-        try {
-            const dataURL = canvas.toDataURL({ format: "png", quality: 1.0 });
-            const printWindow = window.open("", "_blank");
-            
-            printWindow.document.write(`
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    <title>Print Order - ${order ? order.no_order : 'Studio'}</title>
-                    <style>
-                        @page {
-                            size: auto;
-                            margin: 8mm;
-                        }
-                        body { 
-                            margin: 0; padding: 0; background: #fff; 
-                            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
-                            color: #0f172a;
-                        }
-                        .print-container { 
-                            width: 100%; 
-                            margin: 0 auto; 
-                            box-sizing: border-box; 
-                        }
-                        
-                        /* Header Minimalis & Profesional di Kiri Atas */
-                        .minimal-header { 
-                            display: flex;
-                            justify-content: space-between;
-                            align-items: flex-end;
-                            padding-bottom: 8px; 
-                            margin-bottom: 12px;
-                            border-bottom: 1.5px solid #e2e8f0; 
-                        }
-                        .brand-info {
-                            display: flex;
-                            flex-direction: column;
-                            gap: 2px;
-                        }
-                        .customer-name { 
-                            font-size: 15px; 
-                            font-weight: 800; 
-                            color: #0f172a; 
-                            margin: 0; 
-                            text-transform: uppercase;
-                            letter-spacing: 0.5px;
-                            line-height: 1.2;
-                        }
-                        .order-meta { 
-                            font-size: 10px; 
-                            color: #64748b; 
-                            font-weight: 600; 
-                            display: flex;
-                            align-items: center;
-                            gap: 8px;
-                            margin-top: 2px;
-                        }
-                        .order-badge {
-                            background: #f1f5f9;
-                            color: #0f172a;
-                            padding: 1px 6px;
-                            border-radius: 4px;
-                            font-weight: 700;
-                            border: 1px solid #cbd5e1;
-                        }
-                        .studio-tag {
-                            font-size: 9px;
-                            text-transform: uppercase;
-                            letter-spacing: 1.2px;
-                            color: #94a3b8;
-                            font-weight: 700;
-                        }
+        // Render QR Code
+        const qrContainer = document.getElementById("qrcode-hidden");
+        qrContainer.innerHTML = "";
+        const orderNoText = order ? order.no_order : "STUDIO";
+        new QRCode(qrContainer, { text: orderNoText, width: 45, height: 45 });
 
-                        .print-body { 
-                            text-align: center; 
-                            width: 100%; 
-                        }
-                        .print-body img { 
-                            max-width: 100%; 
-                            height: auto; 
-                            object-fit: contain;
-                            display: block;
-                            margin: 0 auto;
-                        }
+        setTimeout(() => {
+          const qrCanvas = qrContainer.querySelector("canvas");
+          const qrDataUrl = qrCanvas ? qrCanvas.toDataURL() : "";
+          const dataURL = canvas.toDataURL({ format: "png", quality: 1.0 });
 
-                        @media print { 
-                            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } 
-                        }
-                    </style>
-                </head>
-                <body>
-                    <div class="print-container">
-                        <div class="minimal-header">
-                            <div class="brand-info">
-                                <h1 class="customer-name">${order ? order.nama : 'PELANGGAN'}</h1>
-                                <div class="order-meta">
-                                    <span>NO. ORDER: <span class="order-badge">#${order ? order.no_order.toUpperCase() : '000'}</span></span>
-                                    <span>•</span>
-                                    <span>${new Date().toLocaleDateString('id-ID', {day: 'numeric', month: 'short', year: 'numeric'})}</span>
-                                </div>
-                            </div>
-                            <div class="studio-tag">Canvas Studio Receipt</div>
-                        </div>
-                        <div class="print-body">
-                            <img src="${dataURL}" onload="setTimeout(() => { window.print(); window.close(); }, 400);" />
-                        </div>
-                    </div>
-                </body>
-                </html>
-            `);
-            printWindow.document.close();
-            if (currentEditingId) updateStatus(currentEditingId, "Selesai");
-            tutupEditor();
-        } catch(err) {
-            console.error(err);
-            alert("Gagal memuat halaman cetak.");
-        }
+          const printWindow = window.open("", "_blank");
+          printWindow.document.write(`
+              <!DOCTYPE html>
+              <html>
+              <head>
+                  <title>Print Receipt - ${orderNoText}</title>
+                  <style>
+                      @page { size: auto; margin: 8mm; }
+                      body { margin: 0; padding: 0; background: #fff; font-family: 'Inter', system-ui, sans-serif; color: #0f172a; }
+                      .print-container { width: 100%; margin: 0 auto; box-sizing: border-box; }
+                      
+                      .minimal-header { 
+                          display: flex; justify-content: space-between; align-items: center; 
+                          padding-bottom: 8px; margin-bottom: 12px; border-bottom: 1.5px solid #cbd5e1; 
+                      }
+                      .customer-name { font-size: 15px; font-weight: 800; color: #0f172a; margin: 0; text-transform: uppercase; }
+                      .order-meta { font-size: 10px; color: #64748b; font-weight: 600; margin-top: 2px; }
+                      .order-badge { background: #f1f5f9; color: #0f172a; padding: 1px 6px; border-radius: 4px; border: 1px solid #cbd5e1; font-weight: 700; }
+                      .qr-box { display: flex; align-items: center; gap: 8px; }
+                      
+                      .print-body { text-align: center; width: 100%; }
+                      .print-body img { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+                  </style>
+              </head>
+              <body>
+                  <div class="print-container">
+                      <div class="minimal-header">
+                          <div>
+                              <h1 class="customer-name">${order ? order.nama : 'PELANGGAN'}</h1>
+                              <div class="order-meta">
+                                  <span>NO. ORDER: <span class="order-badge">#${orderNoText}</span></span>
+                                  <span> • ${new Date().toLocaleDateString('id-ID')}</span>
+                              </div>
+                          </div>
+                          <div class="qr-box">
+                              ${qrDataUrl ? `<img src="${qrDataUrl}" width="45" height="45" />` : ''}
+                          </div>
+                      </div>
+                      <div class="print-body">
+                          <img src="${dataURL}" onload="setTimeout(() => { window.print(); window.close(); }, 400);" />
+                      </div>
+                  </div>
+              </body>
+              </html>
+          `);
+          printWindow.document.close();
+          if (currentEditingId) updateStatus(currentEditingId, "Selesai");
+          tutupEditor();
+        }, 100);
       }
     </script>
   </body>
