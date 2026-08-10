@@ -138,7 +138,7 @@
 
             <button id="btn-mulai-potong" onclick="mulaiPotong()" class="bg-indigo-600/80 hover:bg-indigo-600 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition">✂️ Potong</button>
             <button id="btn-terapkan-potong" onclick="terapkanPotong()" class="hidden bg-emerald-600 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold">✅ Terapkan</button>
-            <button id="btn-batal-potong" onclick="batalPotong()" class="hidden bg-rose-600 text-white px-2 py-1.5 rounded-lg text-xs font-bold">❌ Batal</button>
+            <button id="btn-batal-potong" onclick="batalPotong()" class="hidden bg-rose-600 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold">❌ Batal</button>
 
             <button onclick="hapusGambarAktif()" title="Hapus objek terpilih" class="bg-rose-600/20 hover:bg-rose-600/40 text-rose-300 border border-rose-500/30 px-2 py-1.5 rounded-lg text-xs font-bold transition">🗑️ Hapus</button>
           </div>
@@ -431,7 +431,6 @@
         document.getElementById('btn-batal-potong').classList.add('hidden');
       }
 
-      // --- PERBAIKAN BUKA EDITOR (Fetch JS to Base64 Bypassing CORS Security) ---
       function bukaEditor(id) {
         currentEditingId = id;
         resetPotongUI();
@@ -450,7 +449,6 @@
           if (filename.toLowerCase().match(/\.(jpg|jpeg|png)$/)) {
             jumlahGambar++;
             
-            // Teknik Fetch langsung agar browser tidak melabeli Canvas tidak aman
             fetch("/static/uploads/" + filename)
               .then(res => {
                   if (!res.ok) throw new Error("Gagal mengambil gambar");
@@ -503,23 +501,83 @@
                 <head>
                     <title>Print Order - ${order.no_order}</title>
                     <style>
-                        body { margin: 0; padding: 0; background: #fff; font-family: 'Segoe UI', Arial, sans-serif; }
-                        .print-container { width: 100%; max-width: 210mm; margin: 0 auto; padding: 10mm; box-sizing: border-box; }
-                        .header { text-align: left; margin-bottom: 25px; padding-bottom: 12px; border-bottom: 2px solid #1e293b; }
-                        .order-label { font-size: 10px; color: #64748b; text-transform: uppercase; letter-spacing: 2px; font-weight: 700; margin-bottom: 4px; }
-                        .customer-name { font-size: 24px; font-weight: 800; color: #0f172a; margin: 0; text-transform: uppercase; letter-spacing: 0.5px; }
-                        .order-num { font-size: 13px; color: #334155; font-weight: 600; margin-top: 6px; }
-                        .print-body { text-align: center; width: 100%; }
-                        .print-body img { max-width: 100%; height: auto; }
-                        @media print { @page { margin: 0; } body { margin: 0.5cm; -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+                        @page {
+                            size: A4;
+                            margin: 10mm;
+                        }
+                        body { 
+                            margin: 0; padding: 0; background: #fff; 
+                            font-family: 'Segoe UI', Arial, sans-serif; 
+                        }
+                        .print-container { 
+                            width: 100%; max-width: 190mm; margin: 0 auto; 
+                            box-sizing: border-box; 
+                            page-break-inside: avoid;
+                            break-inside: avoid;
+                        }
+                        /* Header Minimalis & Profesional di Kiri Atas */
+                        .header { 
+                            text-align: left; 
+                            margin-bottom: 12px; 
+                            padding-bottom: 8px; 
+                            border-bottom: 1px solid #cbd5e1; 
+                            display: flex;
+                            justify-content: space-between;
+                            align-items: flex-end;
+                        }
+                        .customer-info {
+                            display: flex;
+                            flex-direction: column;
+                        }
+                        .customer-name { 
+                            font-size: 16px; 
+                            font-weight: 700; 
+                            color: #0f172a; 
+                            margin: 0; 
+                            text-transform: uppercase;
+                            letter-spacing: 0.3px;
+                        }
+                        .order-num { 
+                            font-size: 11px; 
+                            color: #64748b; 
+                            font-weight: 600; 
+                            margin-top: 2px;
+                            letter-spacing: 0.5px;
+                        }
+                        .print-badge {
+                            font-size: 9px;
+                            text-transform: uppercase;
+                            letter-spacing: 1.5px;
+                            color: #94a3b8;
+                            font-weight: 700;
+                        }
+                        .print-body { 
+                            text-align: center; 
+                            width: 100%; 
+                        }
+                        .print-body img { 
+                            max-width: 100%; 
+                            max-height: 235mm; 
+                            height: auto; 
+                            object-fit: contain;
+                            display: block;
+                            margin: 0 auto;
+                            page-break-inside: avoid;
+                            break-inside: avoid;
+                        }
+                        @media print { 
+                            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } 
+                        }
                     </style>
                 </head>
                 <body>
                     <div class="print-container">
                         <div class="header">
-                            <div class="order-label">Detail Pesanan Cetak</div>
-                            <h1 class="customer-name">${order.nama}</h1>
-                            <div class="order-num">NO. ORDER: <span style="color:#000;">${order.no_order.toUpperCase()}</span></div>
+                            <div class="customer-info">
+                                <h1 class="customer-name">${order.nama}</h1>
+                                <div class="order-num">NO. ORDER: <span style="color:#0f172a;">${order.no_order.toUpperCase()}</span></div>
+                            </div>
+                            <div class="print-badge">Print Receipt</div>
                         </div>
                         <div class="print-body">
                             <img src="${dataURL}" onload="setTimeout(() => { window.print(); window.close(); }, 500);" />
