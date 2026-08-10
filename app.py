@@ -1,18 +1,17 @@
 import os
 import time
 import json
-import base64
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for, send_from_directory
 from werkzeug.utils import secure_filename
 
-app = Flask(__name__, static_folder='/tmp/uploads', static_url_path='/static/uploads')
+app = Flask(__name__)
 app.secret_key = 'kunci_rahasia_admin_percetakan'
 
-UPLOAD_FOLDER = '/tmp/uploads'
+UPLOAD_FOLDER = 'static/uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-DB_FILE = '/tmp/db_antrian.json'
+DB_FILE = 'db_antrian.json'
 
 def load_db():
     if os.path.exists(DB_FILE):
@@ -30,21 +29,6 @@ def save_db(db_antrian, current_id):
             json.dump({'db_antrian': db_antrian, 'current_id': current_id}, f)
     except:
         pass
-
-def ensure_file_exists(filename):
-    file_path = os.path.join(UPLOAD_FOLDER, filename)
-    if not os.path.exists(file_path):
-        db_antrian, _ = load_db()
-        for order in db_antrian:
-            file_cache = order.get('file_cache', {})
-            if filename in file_cache:
-                try:
-                    file_bytes = base64.b64decode(file_cache[filename])
-                    with open(file_path, 'wb') as f:
-                        f.write(file_bytes)
-                    break
-                except:
-                    pass
 
 ADMIN_USERNAME = 'admin'
 ADMIN_PASSWORD = 'nabati123'
@@ -97,21 +81,10 @@ def submit_order():
         return "File kosong", 400
 
     saved_filenames = []
-    file_cache = {}
     for i, file in enumerate(files):
         if file and file.filename != '':
             filename = secure_filename(f"{int(time.time())}_{i}_{file.filename}")
-            file_bytes = file.read()
-            
-            # Simpan fisik ke folder /tmp/uploads
-            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            with open(file_path, 'wb') as f:
-                f.write(file_bytes)
-            
-            # Buat cadangan base64 untuk mengantisipasi reset serverless
-            b64_str = base64.b64encode(file_bytes).decode('utf-8')
-            file_cache[filename] = b64_str
-            
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             saved_filenames.append(filename)
             
     order = {
@@ -119,7 +92,6 @@ def submit_order():
         'nama': nama,
         'no_order': no_order,
         'filenames': saved_filenames, 
-        'file_cache': file_cache,
         'status': 'Menunggu',
         'waktu': time.strftime("%Y-%m-%d %H:%M:%S")
     }
@@ -166,14 +138,8 @@ def update_status(order_id):
             
     return jsonify({"success": False, "message": "Order tidak ditemukan"}), 404
 
-@app.route('/static/uploads/<filename>')
-def serve_uploaded_file(filename):
-    ensure_file_exists(filename)
-    return send_from_directory(UPLOAD_FOLDER, filename)
-
 @app.route('/download/<filename>')
 def download_file(filename):
-    ensure_file_exists(filename)
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename, as_attachment=True)
 
 if __name__ == '__main__':
