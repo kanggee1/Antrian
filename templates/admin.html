@@ -11,6 +11,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
     <!-- Library QR Code Generator -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <!-- Library PDF.js untuk merender PDF ke Canvas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
     <style>
       .canvas-container { margin: 0 auto !important; max-width: 100% !important; }
       .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -161,8 +163,8 @@
             <div class="h-4 w-px bg-slate-300 dark:bg-slate-700 mx-0.5"></div>
 
             <!-- Tambah Gambar / Warna BG -->
-            <button onclick="document.getElementById('extraImgInput').click()" title="Tambah foto lain dari laptop/HP" class="bg-emerald-600 hover:bg-emerald-500 text-white px-2 py-1.5 rounded-lg text-xs font-bold transition">➕ Foto</button>
-            <input type="file" id="extraImgInput" accept="image/*" class="hidden" onchange="tambahGambarEkstra(event)">
+            <button onclick="document.getElementById('extraImgInput').click()" title="Tambah foto/dokumen lain dari laptop/HP" class="bg-emerald-600 hover:bg-emerald-500 text-white px-2 py-1.5 rounded-lg text-xs font-bold transition">➕ Media</button>
+            <input type="file" id="extraImgInput" accept="image/*,.pdf" class="hidden" onchange="tambahGambarEkstra(event)">
 
             <!-- Ganti BG Pas Foto -->
             <select onchange="setCanvasBgColor(this.value)" class="bg-white dark:bg-slate-800 text-xs text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 rounded-lg px-2 py-1.5 font-semibold focus:outline-none">
@@ -245,6 +247,9 @@
     <div id="toast" class="fixed bottom-5 right-5 bg-indigo-600 text-white px-4 py-2.5 rounded-xl text-xs font-bold shadow-2xl opacity-0 pointer-events-none transition-all duration-300 transform translate-y-2 z-50"></div>
 
     <script>
+      // Konfigurasi Worker PDF.js
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+
       let canvas = new fabric.Canvas("collageCanvas");
       let currentEditingId = null;
       let globalQueueData = [];
@@ -538,7 +543,7 @@
 
       // Auto Layout Grid
       function autoLayoutGrid() {
-        let objects = canvas.getObjects().filter(o => o.type === 'image');
+        let objects = canvas.getObjects().filter(o => o.type === 'image' || o.type === 'group');
         if (objects.length === 0) return;
         
         let cols = objects.length > 4 ? 3 : (objects.length > 1 ? 2 : 1);
@@ -546,10 +551,10 @@
         let cellW = (canvas.width - (padding * (cols + 1))) / cols;
         
         let curX = padding, curY = padding, maxH = 0;
-        objects.forEach((img, idx) => {
-          img.scaleToWidth(cellW);
-          img.set({ left: curX, top: curY });
-          maxH = Math.max(maxH, img.getScaledHeight());
+        objects.forEach((obj, idx) => {
+          obj.scaleToWidth(cellW);
+          obj.set({ left: curX, top: curY });
+          maxH = Math.max(maxH, obj.getScaledHeight());
           if ((idx + 1) % cols === 0) {
             curX = padding; curY += maxH + padding; maxH = 0;
           } else {
@@ -610,23 +615,57 @@
         showToast("📸 Paket Pas Foto (4x 3x4 + 4x 4x6) dibuat.");
       }
 
+      // Fungsi untuk mengonversi PDF page ke dataURL (Bantuan rendering lokal)
+      function renderPDFToDataURL(arrayBuffer) {
+        return pdfjsLib.getDocument({data: arrayBuffer}).promise
+          .then(pdf => pdf.getPage(1))
+          .then(page => {
+            const viewport = page.getViewport({ scale: 2.0 }); // Render HD
+            const tempCanvas = document.createElement("canvas");
+            const ctx = tempCanvas.getContext("2d");
+            tempCanvas.height = viewport.height;
+            tempCanvas.width = viewport.width;
+
+            return page.render({ canvasContext: ctx, viewport: viewport }).promise
+              .then(() => tempCanvas.toDataURL("image/png"));
+          });
+      }
+
       function tambahGambarEkstra(event) {
         const file = event.target.files[0];
         if (!file) return;
 
-        const reader = new FileReader();
-        reader.onload = function(f) {
-          fabric.Image.fromURL(f.target.result, function(img) {
-            img.scaleToWidth(250);
-            img.set({ left: 50, top: 50 });
-            canvas.add(img);
-            canvas.setActiveObject(img);
-            canvas.renderAll();
-            saveState();
-            showToast("Foto tambahan berhasil dimasukkan.");
-          });
-        };
-        reader.readAsDataURL(file);
+        if (file.type === "application/pdf") {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                renderPDFToDataURL(e.target.result).then(dataUrl => {
+                    fabric.Image.fromURL(dataUrl, function(img) {
+                        img.scaleToWidth(300);
+                        img.set({ left: 50, top: 50 });
+                        canvas.add(img);
+                        canvas.setActiveObject(img);
+                        canvas.renderAll();
+                        saveState();
+                        showToast("Dokumen PDF berhasil dimuat ke Canvas.");
+                    });
+                }).catch(err => alert("Gagal memuat PDF: " + err));
+            };
+            reader.readAsArrayBuffer(file);
+        } else {
+            const reader = new FileReader();
+            reader.onload = function(f) {
+              fabric.Image.fromURL(f.target.result, function(img) {
+                img.scaleToWidth(250);
+                img.set({ left: 50, top: 50 });
+                canvas.add(img);
+                canvas.setActiveObject(img);
+                canvas.renderAll();
+                saveState();
+                showToast("Foto tambahan berhasil dimasukkan.");
+              });
+            };
+            reader.readAsDataURL(file);
+        }
       }
 
       function flipImage(dir) {
@@ -779,6 +818,7 @@
         document.getElementById('btn-batal-potong').classList.add('hidden');
       }
 
+      // INTEGRASI PEMBACAAN DOKUMEN & FOTO KE DALAM EDITOR
       function bukaEditor(id) {
         currentEditingId = id;
         resetPotongUI();
@@ -794,12 +834,11 @@
         canvas.clear();
         canvas.setBackgroundColor("#ffffff", canvas.renderAll.bind(canvas));
 
-        let jumlahGambar = 0;
-
         order.filenames.forEach((filename, index) => {
-          if (filename.toLowerCase().match(/\.(jpg|jpeg|png|webp)$/)) {
-            jumlahGambar++;
-            
+          let ext = filename.split('.').pop().toLowerCase();
+          
+          if (['jpg', 'jpeg', 'png', 'webp'].includes(ext)) {
+            // PROSES FOTO SEPERTI BIASA
             fetch("/static/uploads/" + filename)
               .then(res => res.blob())
               .then(blob => {
@@ -817,6 +856,57 @@
                   };
                   reader.readAsDataURL(blob);
               });
+
+          } else if (ext === 'pdf') {
+            // PROSES FILE PDF MENGGUNAKAN PDF.JS (DIRENDER KE CANVAS)
+            fetch("/static/uploads/" + filename)
+              .then(res => res.arrayBuffer())
+              .then(buffer => renderPDFToDataURL(buffer))
+              .then(dataUrl => {
+                  fabric.Image.fromURL(dataUrl, function(img) {
+                      img.scaleToWidth(300);
+                      img.set({ left: 40 + (index * 25), top: 40 + (index * 25) });
+                      canvas.add(img);
+                      canvas.renderAll();
+                      showToast("Halaman 1 dari PDF berhasil dimuat.");
+                      if (index === order.filenames.length - 1) saveState();
+                  });
+              }).catch(err => console.error("Gagal load PDF:", err));
+              
+          } else if (['doc', 'docx', 'xls', 'xlsx'].includes(ext)) {
+            // SMART PLACEHOLDER UNTUK DOKUMEN WORD/EXCEL
+            // Menggambar ikon dokumen secara visual di canvas agar bisa dipindahkan/digabung
+            let docRect = new fabric.Rect({
+                width: 180, height: 240, fill: '#f8fafc', stroke: '#94a3b8', 
+                strokeWidth: 2, rx: 8, ry: 8, originX: 'center', originY: 'center'
+            });
+            let typeColor = ['doc', 'docx'].includes(ext) ? '#2563eb' : '#16a34a';
+            let labelText = ['doc', 'docx'].includes(ext) ? 'Word Doc' : 'Excel Sheet';
+            
+            let topRibbon = new fabric.Rect({
+                width: 180, height: 60, fill: typeColor, top: -120, originX: 'center', originY: 'top', rx: 8, ry: 8
+            });
+            let docLabel = new fabric.Text(labelText, {
+                fontSize: 18, fontWeight: 'bold', fill: '#ffffff', originX: 'center', originY: 'center', top: -90, fontFamily: 'sans-serif'
+            });
+            
+            let shortName = filename.length > 25 ? filename.substring(13, 28) + '...' : filename.substring(13);
+            let nameText = new fabric.Text(shortName, {
+                fontSize: 14, fill: '#334155', originX: 'center', originY: 'center', top: 0, fontFamily: 'sans-serif', textAlign: 'center'
+            });
+            
+            let noticeText = new fabric.Text("(Gunakan tombol download\nuntuk mencetak file ini)", {
+                fontSize: 10, fill: '#ef4444', originX: 'center', originY: 'center', top: 50, fontFamily: 'sans-serif', textAlign: 'center'
+            });
+
+            let group = new fabric.Group([docRect, topRibbon, docLabel, nameText, noticeText], {
+                left: 40 + (index * 25), top: 40 + (index * 25)
+            });
+            
+            canvas.add(group);
+            canvas.renderAll();
+            showToast(`File ${ext.toUpperCase()} ditambahkan sebagai penanda cetak.`);
+            if (index === order.filenames.length - 1) saveState();
           }
         });
       }
