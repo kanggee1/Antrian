@@ -597,7 +597,7 @@
         canvas.setHeight(h);
         canvas.renderAll();
         
-        resetDimensionInfo(); // Update info UI saat ukuran kertas berubah
+        resetDimensionInfo(); 
         
         if (document.getElementById("toggleBleed").checked) toggleBleedLines(true);
         if (document.getElementById("toggleGrid").checked) toggleGridLines(true);
@@ -995,6 +995,7 @@
       }
 
       function cetakLangsung() {
+        // Hapus garis bantu sebelum cetak
         if (bleedLineGroup) canvas.remove(bleedLineGroup);
         if (backgroundGridGroup) canvas.remove(backgroundGridGroup);
         const order = globalQueueData.find((q) => q.id === currentEditingId) || globalHistoryData.find((q) => q.id === currentEditingId);
@@ -1011,6 +1012,7 @@
           const qrDataUrl = qrCanvas ? qrCanvas.toDataURL() : "";
           const dataURL = canvas.toDataURL({ format: "png", quality: 1.0 });
 
+          // PERBAIKAN: CSS Khusus Cetak 1 Halaman Mulus
           const printWindow = window.open("", "_blank");
           printWindow.document.write(`
               <!DOCTYPE html>
@@ -1018,10 +1020,22 @@
               <head>
                   <title>Print Receipt - ${orderNoText}</title>
                   <style>
-                      @page { size: auto; margin: 8mm; }
-                      body { margin: 0; padding: 0; background: #fff; font-family: 'Inter', system-ui, sans-serif; color: #0f172a; }
-                      .print-container { width: 100%; margin: 0 auto; box-sizing: border-box; }
-                      
+                      @page { 
+                          size: A4 portrait; /* Paksa format A4 */
+                          margin: 10mm; 
+                      }
+                      body { 
+                          margin: 0; padding: 0; background: #fff; 
+                          font-family: 'Inter', system-ui, sans-serif; color: #0f172a; 
+                      }
+                      .print-container { 
+                          width: 100%; 
+                          max-width: 190mm; /* Sesuaikan batas aman A4 */
+                          margin: 0 auto; 
+                          box-sizing: border-box; 
+                          page-break-inside: avoid; /* Larang pemecahan elemen */
+                          break-inside: avoid;
+                      }
                       .minimal-header { 
                           display: flex; justify-content: space-between; align-items: center; 
                           padding-bottom: 8px; margin-bottom: 12px; border-bottom: 1.5px solid #cbd5e1; 
@@ -1032,7 +1046,19 @@
                       .qr-box { display: flex; align-items: center; gap: 8px; }
                       
                       .print-body { text-align: center; width: 100%; }
-                      .print-body img { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+                      
+                      /* INI KUNCI UTAMANYA AGAR GAMBAR TIDAK TURUN KE HALAMAN 2 */
+                      .print-body img { 
+                          max-width: 100%; 
+                          max-height: 245mm; /* Batasi tinggi maksimal agar pas 1 halaman dengan header */
+                          width: auto;
+                          height: auto;
+                          object-fit: contain; /* Jaga proporsi agar tidak gepeng */
+                          display: block; 
+                          margin: 0 auto;
+                          page-break-inside: avoid;
+                          break-inside: avoid;
+                      }
                   </style>
               </head>
               <body>
