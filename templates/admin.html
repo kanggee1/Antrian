@@ -15,16 +15,38 @@
       .canvas-container { margin: 0 auto !important; max-width: 100% !important; }
       .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
       .custom-scroll::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 4px; }
+      /* Animasi Bulk Bar */
+      #bulk-action-bar { transition: transform 0.3s ease, opacity 0.3s ease; }
+      .bulk-hidden { transform: translateY(100%); opacity: 0; pointer-events: none; }
+      .bulk-visible { transform: translateY(0); opacity: 1; pointer-events: auto; }
     </style>
   </head>
-  <body class="bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-100 p-2 md:p-6 flex flex-col min-h-screen font-sans transition-colors duration-300">
+  <body class="bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-100 p-2 md:p-6 flex flex-col min-h-screen font-sans transition-colors duration-300 relative">
+    
+    <!-- Floating Bulk Action Bar -->
+    <div id="bulk-action-bar" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-2xl rounded-2xl px-6 py-4 flex items-center justify-between gap-6 z-50 bulk-hidden w-[90%] md:w-auto">
+        <div class="flex items-center gap-3">
+            <div class="bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-400 font-bold px-3 py-1.5 rounded-lg text-sm">
+                <span id="bulk-count">0</span> Data Terpilih
+            </div>
+        </div>
+        <div class="flex gap-2">
+            <button onclick="hapusBulkTerpilih()" class="bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition shadow-md flex items-center gap-1.5">
+                🗑️ Hapus Pilihan
+            </button>
+            <button onclick="clearBulkSelection()" class="bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 px-4 py-2 rounded-xl text-xs font-bold transition hover:bg-slate-300 dark:hover:bg-slate-600">
+                Batal
+            </button>
+        </div>
+    </div>
+
     <div class="max-w-7xl mx-auto w-full flex-grow flex flex-col">
       
       <!-- Header Utama -->
       <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4 bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-md transition-colors">
         <div class="text-center md:text-left">
           <h1 class="text-xl md:text-2xl font-black tracking-tight text-slate-900 dark:text-white flex items-center gap-2 justify-center md:justify-start">
-            🖨️ Management Cetak <span class="text-xs font-bold bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 px-2.5 py-1 rounded-full border border-indigo-500/30">Sparepart Studio</span>
+            🖨️ Management Cetak <span class="text-xs font-bold bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 px-2.5 py-1 rounded-full border border-indigo-500/30">Sparepart Editor</span>
           </h1>
           <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Control Panel & Studio Editor Sparepart</p>
         </div>
@@ -37,45 +59,70 @@
         </div>
       </div>
 
-      <!-- Stat Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      <!-- PEMBARUAN: Stat Cards (Ditambah Storage Server) -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 flex items-center justify-between shadow-sm">
           <div>
-            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Antrian Menunggu</p>
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Menunggu</p>
             <h3 id="stat-menunggu" class="text-2xl md:text-3xl font-black text-amber-500 dark:text-amber-400 mt-1">0</h3>
           </div>
-          <div class="bg-amber-500/10 p-3 rounded-xl text-amber-500 text-xl font-bold">⏳</div>
+          <div class="bg-amber-500/10 p-3 rounded-xl text-amber-500 text-xl font-bold hidden md:block">⏳</div>
         </div>
         <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 flex items-center justify-between shadow-sm">
           <div>
             <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Selesai</p>
             <h3 id="stat-selesai" class="text-2xl md:text-3xl font-black text-emerald-500 dark:text-emerald-400 mt-1">0</h3>
           </div>
-          <div class="bg-emerald-500/10 p-3 rounded-xl text-emerald-500 text-xl font-bold">✅</div>
+          <div class="bg-emerald-500/10 p-3 rounded-xl text-emerald-500 text-xl font-bold hidden md:block">✅</div>
         </div>
         <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 flex items-center justify-between shadow-sm">
           <div>
-            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Diproses</p>
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Data</p>
             <h3 id="stat-total" class="text-2xl md:text-3xl font-black text-blue-500 dark:text-blue-400 mt-1">0</h3>
           </div>
-          <div class="bg-blue-500/10 p-3 rounded-xl text-blue-500 text-xl font-bold">📊</div>
+          <div class="bg-blue-500/10 p-3 rounded-xl text-blue-500 text-xl font-bold hidden md:block">📊</div>
+        </div>
+        <!-- FITUR BARU: Storage Monitor -->
+        <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 flex items-center justify-between shadow-sm relative overflow-hidden">
+          <div class="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 to-purple-600"></div>
+          <div>
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Server Storage</p>
+            <h3 id="stat-storage" class="text-xl md:text-2xl font-black text-indigo-600 dark:text-indigo-400 mt-1">0 MB</h3>
+          </div>
+          <div class="bg-indigo-500/10 p-3 rounded-xl text-indigo-500 text-xl font-bold hidden md:block">💾</div>
         </div>
       </div>
 
-      <!-- Navigation & Filter -->
-      <div class="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4 mb-4 border-b border-slate-200 dark:border-slate-800 pb-3">
-        <div class="flex space-x-2 bg-white dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700 w-fit">
+      <!-- Navigation & Advanced Filter -->
+      <div class="flex flex-col xl:flex-row justify-between items-stretch xl:items-center gap-4 mb-4 border-b border-slate-200 dark:border-slate-800 pb-3">
+        <div class="flex space-x-2 bg-white dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700 w-fit shrink-0">
           <button onclick="switchTab('antrian')" id="tab-antrian" class="px-4 py-2 font-bold text-xs rounded-lg bg-blue-600 text-white transition shadow-md">📋 Antrian Aktif</button>
           <button onclick="switchTab('riwayat')" id="tab-riwayat" class="px-4 py-2 font-bold text-xs rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition">📜 Riwayat & Re-use</button>
         </div>
         
-        <div class="flex items-center gap-2 w-full md:w-auto">
-          <!-- Tombol Hapus Semua Riwayat -->
-          <button onclick="hapusSemuaRiwayat()" id="btn-hapus-semua" class="hidden bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition shadow-md whitespace-nowrap">
-            🗑️ Hapus Semua Riwayat
-          </button>
+        <div class="flex items-center gap-2 w-full xl:w-auto flex-wrap md:flex-nowrap justify-end">
+          
+          <div id="history-controls" class="hidden flex flex-wrap gap-2 items-center w-full md:w-auto bg-white dark:bg-slate-800 p-1.5 rounded-xl border border-slate-200 dark:border-slate-700">
+            <select id="filterStatus" onchange="debounceSearch()" class="px-3 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-bold text-slate-700 dark:text-slate-300 focus:outline-none">
+                <option value="">Semua Status</option>
+                <option value="Selesai">✅ Selesai</option>
+                <option value="Dilewati">⏭️ Dilewati</option>
+            </select>
+            
+            <input type="date" id="filterDate" onchange="debounceSearch()" class="px-3 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-bold text-slate-700 dark:text-slate-300 focus:outline-none" title="Filter per Tanggal" />
+            
+            <div class="h-6 w-px bg-slate-300 dark:bg-slate-700 hidden md:block mx-1"></div>
+            
+            <a href="/api/export_csv" class="bg-emerald-600/20 hover:bg-emerald-600/40 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 px-3 py-1.5 rounded-lg text-xs font-bold transition whitespace-nowrap">
+              📊 Export CSV
+            </a>
+            <button onclick="hapusSemuaRiwayat()" class="bg-rose-600/20 hover:bg-rose-600/40 text-rose-700 dark:text-rose-400 border border-rose-500/30 px-3 py-1.5 rounded-lg text-xs font-bold transition whitespace-nowrap">
+              🗑️ Hapus Semua
+            </button>
+          </div>
+          
           <div class="relative w-full md:w-64">
-            <input type="text" id="searchInput" onkeyup="debounceSearch()" placeholder="🔍 Cari Nama / No Order..." class="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:border-blue-500 w-full" />
+            <input type="text" id="searchInput" onkeyup="debounceSearch()" placeholder="🔍 Cari Nama / No Order..." class="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 w-full transition shadow-sm" />
           </div>
         </div>
       </div>
@@ -87,10 +134,10 @@
             <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-700/60 text-left">
               <thead class="bg-slate-50 dark:bg-slate-800/90 sticky top-0 backdrop-blur z-10">
                 <tr>
-                  <th class="px-4 py-3.5 text-[10px] font-bold text-slate-400 uppercase">No. Order</th>
+                  <th class="px-4 py-3.5 text-[10px] font-bold text-slate-400 uppercase w-32">No. Order</th>
                   <th class="px-4 py-3.5 text-[10px] font-bold text-slate-400 uppercase">Nama Pelanggan</th>
                   <th class="px-4 py-3.5 text-[10px] font-bold text-slate-400 uppercase">File Lampiran</th>
-                  <th class="px-4 py-3.5 text-center text-[10px] font-bold text-slate-400 uppercase">Aksi & Kontrol</th>
+                  <th class="px-4 py-3.5 text-center text-[10px] font-bold text-slate-400 uppercase w-72">Aksi & Kontrol</th>
                 </tr>
               </thead>
               <tbody id="queue-body" class="divide-y divide-slate-200 dark:divide-slate-700/40 text-xs"></tbody>
@@ -106,11 +153,14 @@
             <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-700/60 text-left">
               <thead class="bg-slate-50 dark:bg-slate-800/90 sticky top-0 backdrop-blur z-10">
                 <tr>
-                  <th class="px-4 py-3.5 text-[10px] font-bold text-slate-400 uppercase">No. Order</th>
+                  <th class="px-4 py-3.5 w-12 text-center border-r border-slate-200 dark:border-slate-700/50">
+                      <input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll()" class="rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer w-4 h-4">
+                  </th>
+                  <th class="px-4 py-3.5 text-[10px] font-bold text-slate-400 uppercase w-32">No. Order</th>
                   <th class="px-4 py-3.5 text-[10px] font-bold text-slate-400 uppercase">Nama Pelanggan</th>
-                  <th class="px-4 py-3.5 text-[10px] font-bold text-slate-400 uppercase">File</th>
-                  <th class="px-4 py-3.5 text-[10px] font-bold text-slate-400 uppercase">Status</th>
-                  <th class="px-4 py-3.5 text-center text-[10px] font-bold text-slate-400 uppercase">Aksi</th>
+                  <th class="px-4 py-3.5 text-[10px] font-bold text-slate-400 uppercase">Manajemen File</th>
+                  <th class="px-4 py-3.5 text-[10px] font-bold text-slate-400 uppercase w-24">Status</th>
+                  <th class="px-4 py-3.5 text-center text-[10px] font-bold text-slate-400 uppercase w-64">Aksi Eksekutif</th>
                 </tr>
               </thead>
               <tbody id="history-body" class="divide-y divide-slate-200 dark:divide-slate-700/40 text-xs"></tbody>
@@ -276,11 +326,12 @@
       let canvasStateStack = [];
       let canvasRedoStack = [];
       let isStateLocked = false;
+      
+      let selectedHistoryIds = new Set();
 
       canvas.setWidth(750);
       canvas.setHeight(1060);
 
-      // --- SMART DIMENSION VIEWER LOGIC ---
       function updateDimensionInfo() {
         let activeObj = canvas.getActiveObject();
         if (activeObj) {
@@ -302,7 +353,6 @@
       canvas.on('selection:updated', updateDimensionInfo);
       canvas.on('selection:cleared', resetDimensionInfo);
       canvas.on('object:scaling', updateDimensionInfo);
-      // ------------------------------------
 
       canvas.on('object:modified', saveState);
       canvas.on('object:added', saveState);
@@ -398,32 +448,33 @@
         }, 2500);
       }
 
-      // FITUR ENTERPRISE: Menampilkan tombol Hapus Semua hanya di tab Riwayat
       function switchTab(tabName) {
         activeTab = tabName;
         const btnAntrian = document.getElementById("tab-antrian");
         const btnRiwayat = document.getElementById("tab-riwayat");
         const contentAntrian = document.getElementById("content-antrian");
         const contentRiwayat = document.getElementById("content-riwayat");
-        const btnHapusSemua = document.getElementById("btn-hapus-semua");
+        const historyControls = document.getElementById("history-controls");
 
         if (tabName === "antrian") {
           btnAntrian.className = "px-4 py-2 font-bold text-xs rounded-lg bg-blue-600 text-white transition shadow-md";
           btnRiwayat.className = "px-4 py-2 font-bold text-xs rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition";
           contentAntrian.classList.remove("hidden");
           contentRiwayat.classList.add("hidden");
-          btnHapusSemua.classList.add("hidden");
+          historyControls.classList.add("hidden");
+          clearBulkSelection(); 
         } else {
           btnRiwayat.className = "px-4 py-2 font-bold text-xs rounded-lg bg-blue-600 text-white transition shadow-md";
           btnAntrian.className = "px-4 py-2 font-bold text-xs rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition";
           contentRiwayat.classList.remove("hidden");
           contentAntrian.classList.add("hidden");
-          btnHapusSemua.classList.remove("hidden");
+          historyControls.classList.remove("hidden");
         }
         loadData();
       }
 
       function loadData() {
+        // Ambil Data Antrian
         fetch("/api/queue")
           .then((res) => res.json())
           .then((data) => {
@@ -432,8 +483,12 @@
             renderQueue(data);
           });
 
+        // Ambil Data Riwayat
         let searchKey = document.getElementById("searchInput").value;
-        fetch(`/api/history?q=${searchKey}`)
+        let dateVal = document.getElementById("filterDate").value;
+        let statusVal = document.getElementById("filterStatus") ? document.getElementById("filterStatus").value : "";
+        
+        fetch(`/api/history?q=${searchKey}&date=${dateVal}&status=${statusVal}`)
           .then((res) => res.json())
           .then((data) => {
             globalHistoryData = data;
@@ -441,17 +496,40 @@
             document.getElementById("stat-total").innerText = data.length + globalQueueData.length;
             renderHistory(data);
           });
+
+        // Ambil Data Statistik Server
+        fetch("/api/system_stats")
+          .then((res) => res.json())
+          .then((data) => {
+             document.getElementById("stat-storage").innerText = data.storage;
+          });
       }
 
-      function generateFileHTML(filenames) {
-        return filenames.map((f) => {
-            let shortName = f.length > 22 ? f.substring(13, 30) + "..." : f.substring(13);
+      function generateFileSection(order) {
+        let filesHtml = order.filenames.map((f) => {
+            let shortName = f.length > 20 ? f.substring(13, 25) + "..." : f.substring(13);
             return `
-                <div class="flex items-center gap-2 mb-1">
-                    <a href="/static/uploads/${f}" target="_blank" class="text-blue-500 dark:text-blue-400 hover:underline font-medium text-xs flex items-center gap-1">📄 ${shortName}</a>
-                    <a href="/download/${f}" class="bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-200 px-2 py-0.5 rounded text-[10px] font-bold">Download</a>
+                <div class="flex items-center gap-2 mb-0.5">
+                    <a href="/static/uploads/${f}" target="_blank" class="text-blue-500 dark:text-blue-400 hover:underline font-medium text-[11px] flex items-center gap-1">📄 ${shortName}</a>
                 </div>`;
-          }).join("");
+        }).join("");
+        
+        if (order.filenames.length > 1) {
+            filesHtml += `
+            <div class="mt-2 pt-2 border-t border-slate-200 dark:border-slate-700/50">
+                <a href="/api/download_zip/${order.id}" class="inline-block bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/20 px-2 py-1 rounded text-[10px] font-bold transition shadow-sm">
+                    📦 Download Semua (ZIP)
+                </a>
+            </div>`;
+        } else if (order.filenames.length === 1) {
+             filesHtml += `
+            <div class="mt-2 pt-2 border-t border-slate-200 dark:border-slate-700/50">
+                <a href="/download/${order.filenames[0]}" class="inline-block bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-200 px-2 py-1 rounded text-[10px] font-bold transition">
+                    ⬇️ Download File
+                </a>
+            </div>`;
+        }
+        return filesHtml;
       }
 
       function renderQueue(data) {
@@ -462,28 +540,49 @@
           return;
         }
         data.forEach((item) => {
+          let isVip = item.priority === true;
+          let rowClass = isVip 
+              ? "bg-amber-50 dark:bg-amber-900/10 hover:bg-amber-100 dark:hover:bg-amber-900/20 transition border-l-4 border-l-amber-500 border-b border-amber-200 dark:border-amber-700/40" 
+              : "hover:bg-slate-100 dark:hover:bg-slate-700/30 transition border-l-4 border-l-transparent border-b border-slate-200 dark:border-slate-700/40";
+          
+          let vipBadge = isVip 
+              ? `<span class="ml-2 bg-gradient-to-r from-amber-500 to-orange-600 text-white text-[9px] px-1.5 py-0.5 rounded font-black tracking-wider animate-pulse shadow-sm">VIP</span>` 
+              : "";
+              
+          let btnVip = isVip
+              ? `<button onclick="togglePriority(${item.id})" class="bg-amber-100 dark:bg-amber-900/30 hover:bg-amber-200 dark:hover:bg-amber-900/50 text-amber-700 dark:text-amber-400 px-2.5 py-1.5 rounded-lg text-xs font-bold transition border border-amber-300 dark:border-amber-700" title="Cabut status prioritas">⭐ Cabut VIP</button>`
+              : `<button onclick="togglePriority(${item.id})" class="bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 px-2.5 py-1.5 rounded-lg text-xs font-bold transition" title="Tandai sebagai pesanan VIP/Darurat">📌 Prioritas</button>`;
+
           tbody.innerHTML += `
-            <tr class="hover:bg-slate-100 dark:hover:bg-slate-700/30 transition border-b border-slate-200 dark:border-slate-700/40">
-                <td class="px-4 py-3"><span class="font-extrabold text-blue-600 dark:text-blue-400">${item.no_order}</span></td>
+            <tr class="${rowClass}">
+                <td class="px-4 py-3">
+                    <span class="font-extrabold text-blue-600 dark:text-blue-400">${item.no_order}</span>
+                    ${vipBadge}
+                </td>
                 <td class="px-4 py-3 font-bold text-slate-800 dark:text-slate-100">${item.nama}</td>
-                <td class="px-4 py-3">${generateFileHTML(item.filenames)}</td>
+                <td class="px-4 py-3">${generateFileSection(item)}</td>
                 <td class="px-4 py-3 text-center">
-                    <div class="flex items-center justify-center gap-1.5">
+                    <div class="flex items-center justify-center gap-1.5 flex-wrap">
+                        ${btnVip}
+                        <!-- FITUR BARU: Tombol Cetak Stiker Thermal -->
+                        <button onclick="cetakLabelThermal(${item.id})" class="bg-slate-700 hover:bg-slate-800 text-white dark:bg-slate-600 dark:hover:bg-slate-500 px-2.5 py-1.5 rounded-lg text-xs font-bold transition" title="Cetak Stiker Map/Order">🏷️ Label</button>
                         <button onclick="bukaEditor(${item.id})" class="bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-600 dark:text-indigo-300 border border-indigo-500/30 px-2.5 py-1.5 rounded-lg text-xs font-bold transition">🎨 Studio</button>
                         <button onclick="updateStatus(${item.id}, 'Selesai')" class="bg-emerald-600 hover:bg-emerald-500 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition shadow-sm">✅ Selesai</button>
-                        <button onclick="updateStatus(${item.id}, 'Dilewati')" class="bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 px-2.5 py-1.5 rounded-lg text-xs font-bold transition">⏭️ Lewati</button>
                     </div>
                 </td>
             </tr>`;
         });
       }
 
-      // FITUR ENTERPRISE: Grouping Riwayat Berdasarkan Tanggal
       function renderHistory(data) {
         const tbody = document.getElementById("history-body");
         tbody.innerHTML = "";
+        
+        const selectAllBox = document.getElementById("selectAllCheckbox");
+        if(selectAllBox) selectAllBox.checked = false;
+
         if (data.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="5" class="px-4 py-8 text-center text-slate-400 italic">Belum ada riwayat atau tidak ditemukan.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-8 text-center text-slate-400 italic">Belum ada riwayat atau tidak ditemukan pencarian/filter tersebut.</td></tr>`;
             return;
         }
 
@@ -493,12 +592,11 @@
             let itemDate = item.waktu ? item.waktu.split(" ")[0] : "Tanggal Tidak Diketahui"; 
             let itemTime = item.waktu ? item.waktu.split(" ")[1] : "";
             
-            // Buat header tanggal
             if (itemDate !== currentDate) {
                 currentDate = itemDate;
                 tbody.innerHTML += `
                     <tr class="bg-indigo-50 dark:bg-indigo-900/20">
-                        <td colspan="5" class="px-4 py-2 text-[10px] font-black text-indigo-700 dark:text-indigo-400 uppercase tracking-widest border-b border-indigo-100 dark:border-indigo-800/50">
+                        <td colspan="6" class="px-4 py-2 text-[10px] font-black text-indigo-700 dark:text-indigo-400 uppercase tracking-widest border-b border-indigo-100 dark:border-indigo-800/50">
                             📅 TANGGAL: ${currentDate}
                         </td>
                     </tr>
@@ -506,39 +604,123 @@
             }
 
             let badgeColor = item.status === "Selesai" ? "text-emerald-500 bg-emerald-500/10 border-emerald-500/20" : "text-slate-400 bg-slate-200 dark:bg-slate-700/50 border-slate-300 dark:border-slate-600";
+            
+            let isChecked = selectedHistoryIds.has(item.id) ? "checked" : "";
+            let rowSelectedClass = selectedHistoryIds.has(item.id) ? "bg-blue-50/50 dark:bg-blue-900/10" : "";
+
             tbody.innerHTML += `
-            <tr class="hover:bg-slate-100 dark:hover:bg-slate-700/30 transition border-b border-slate-200 dark:border-slate-700/40">
+            <tr class="hover:bg-slate-100 dark:hover:bg-slate-700/30 transition border-b border-slate-200 dark:border-slate-700/40 ${rowSelectedClass}">
+                <td class="px-4 py-3 text-center border-r border-slate-200 dark:border-slate-700/50">
+                    <input type="checkbox" onchange="toggleRowSelection(${item.id}, this)" class="row-checkbox rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer w-4 h-4" value="${item.id}" ${isChecked}>
+                </td>
                 <td class="px-4 py-3 font-extrabold text-slate-700 dark:text-slate-300">
                     ${item.no_order}<br>
                     <span class="text-[9px] font-normal text-slate-400">${itemTime}</span>
                 </td>
                 <td class="px-4 py-3 font-bold text-slate-800 dark:text-slate-200">${item.nama}</td>
-                <td class="px-4 py-3">${generateFileHTML(item.filenames)}</td>
+                <td class="px-4 py-3">${generateFileSection(item)}</td>
                 <td class="px-4 py-3"><span class="px-2 py-0.5 rounded-md text-[10px] font-bold border ${badgeColor}">${item.status}</span></td>
                 <td class="px-4 py-3 text-center">
-                    <div class="flex items-center justify-center gap-1.5">
-                        <button onclick="updateStatus(${item.id}, 'Menunggu')" class="bg-blue-600/20 hover:bg-blue-600/40 text-blue-600 dark:text-blue-300 border border-blue-500/30 px-3 py-1.5 rounded-lg text-xs font-bold transition" title="Masukkan lagi ke Antrian">🔄 Re-use</button>
-                        <button onclick="hapusRiwayat(${item.id})" class="bg-rose-600/20 hover:bg-rose-600/40 text-rose-600 dark:text-rose-300 border border-rose-500/30 px-3 py-1.5 rounded-lg text-xs font-bold transition">🗑️ Hapus</button>
+                    <div class="flex items-center justify-center gap-1.5 flex-wrap">
+                        <button onclick="updateStatus(${item.id}, 'Menunggu')" class="bg-blue-600/10 hover:bg-blue-600/20 text-blue-600 dark:text-blue-400 border border-blue-500/20 px-2.5 py-1.5 rounded-lg text-xs font-bold transition" title="Masukkan lagi ke Antrian">🔄 Re-use</button>
+                        <!-- FITUR BARU: Tombol Cetak Stiker Thermal -->
+                        <button onclick="cetakLabelThermal(${item.id})" class="bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 px-2.5 py-1.5 rounded-lg text-xs font-bold transition shadow-sm" title="Cetak Stiker Map/Order">🏷️ Label Stiker</button>
                     </div>
                 </td>
             </tr>`;
         });
+        
+        updateBulkActionBar();
       }
 
-      // FITUR ENTERPRISE: Pencarian Anti-Lag (Debounce)
+      function toggleSelectAll() {
+          const masterCheck = document.getElementById("selectAllCheckbox").checked;
+          const rowChecks = document.querySelectorAll(".row-checkbox");
+          
+          rowChecks.forEach(cb => {
+              cb.checked = masterCheck;
+              const rowId = parseInt(cb.value);
+              if (masterCheck) {
+                  selectedHistoryIds.add(rowId);
+              } else {
+                  selectedHistoryIds.delete(rowId);
+              }
+          });
+          loadData(); 
+      }
+
+      function toggleRowSelection(id, checkbox) {
+          if (checkbox.checked) {
+              selectedHistoryIds.add(id);
+          } else {
+              selectedHistoryIds.delete(id);
+              document.getElementById("selectAllCheckbox").checked = false;
+          }
+          updateBulkActionBar();
+          const tr = checkbox.closest("tr");
+          if(checkbox.checked) {
+              tr.classList.add("bg-blue-50/50", "dark:bg-blue-900/10");
+          } else {
+              tr.classList.remove("bg-blue-50/50", "dark:bg-blue-900/10");
+          }
+      }
+
+      function updateBulkActionBar() {
+          const bar = document.getElementById("bulk-action-bar");
+          const count = document.getElementById("bulk-count");
+          count.innerText = selectedHistoryIds.size;
+          
+          if (selectedHistoryIds.size > 0) {
+              bar.classList.remove("bulk-hidden");
+              bar.classList.add("bulk-visible");
+          } else {
+              bar.classList.remove("bulk-visible");
+              bar.classList.add("bulk-hidden");
+          }
+      }
+
+      function clearBulkSelection() {
+          selectedHistoryIds.clear();
+          const selectAllBox = document.getElementById("selectAllCheckbox");
+          if(selectAllBox) selectAllBox.checked = false;
+          loadData(); 
+          updateBulkActionBar();
+      }
+
+      function hapusBulkTerpilih() {
+          if (selectedHistoryIds.size === 0) return;
+          if (confirm(`Yakin ingin MENGHAPUS ${selectedHistoryIds.size} data pesanan secara permanen?`)) {
+              fetch('/api/bulk_delete', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ ids: Array.from(selectedHistoryIds) })
+              })
+              .then(res => res.json())
+              .then(res => {
+                  if (res.success) {
+                      showToast("🧹 " + res.message);
+                      clearBulkSelection();
+                  }
+              });
+          }
+      }
+
       let searchTimeout;
       function debounceSearch() {
         clearTimeout(searchTimeout);
         searchTimeout = setTimeout(() => {
             let keyword = document.getElementById("searchInput").value.toLowerCase();
+            let dateVal = document.getElementById("filterDate").value;
+            let statusVal = document.getElementById("filterStatus") ? document.getElementById("filterStatus").value : "";
+            
             if (activeTab === "antrian") {
                 renderQueue(globalQueueData.filter((i) => i.nama.toLowerCase().includes(keyword) || i.no_order.toLowerCase().includes(keyword)));
             } else {
-                fetch(`/api/history?q=${keyword}`)
+                fetch(`/api/history?q=${keyword}&date=${dateVal}&status=${statusVal}`)
                     .then(res => res.json())
                     .then(data => renderHistory(data));
             }
-        }, 400); // Mencegah server nge-hang saat mengetik cepat
+        }, 400); 
       }
 
       function updateStatus(id, status) {
@@ -554,31 +736,94 @@
         });
       }
 
-      function hapusRiwayat(id) {
-        if (confirm("Peringatan: Yakin ingin menghapus data riwayat ini secara permanen?")) {
-          fetch(`/api/delete/${id}`, { method: "DELETE" })
-            .then((res) => res.json())
-            .then((res) => {
+      function togglePriority(id) {
+          fetch(`/api/toggle_priority/${id}`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" }
+          }).then((res) => res.json()).then((res) => {
               if (res.success) {
-                showToast("🗑️ " + res.message);
-                loadData();
+                  showToast("⭐ Status VIP diperbarui");
+                  loadData();
               }
-            });
-        }
+          });
       }
 
-      // FITUR ENTERPRISE: Hapus Semua Riwayat 1 Klik
       function hapusSemuaRiwayat() {
-        if (confirm("🚨 PERINGATAN! Anda yakin ingin menghapus SEMUA RIWAYAT dan FILE cetak usang secara permanen? Aksi ini tidak dapat dibatalkan dan akan membebaskan banyak penyimpanan server.")) {
+        if (confirm("🚨 PERINGATAN! Anda yakin ingin menghapus SEMUA RIWAYAT (Selesai/Dilewati) dan FILE cetak secara permanen? Aksi ini tidak dapat dibatalkan.")) {
             fetch('/api/delete_all_history', { method: "DELETE" })
                 .then(res => res.json())
                 .then(res => {
                     if (res.success) {
                         showToast("🧹 " + res.message);
+                        clearBulkSelection();
                         loadData(); 
                     }
                 });
         }
+      }
+
+      // FITUR BARU: GENERATOR CETAK LABEL THERMAL 58mm/80mm
+      function cetakLabelThermal(id) {
+          const order = globalHistoryData.find(q => q.id === id) || globalQueueData.find(q => q.id === id);
+          if (!order) return;
+
+          const printWindow = window.open("", "_blank", "width=400,height=600");
+          printWindow.document.write(`
+          <!DOCTYPE html>
+          <html>
+          <head>
+              <title>Label Stiker - #${order.no_order}</title>
+              <style>
+                  @page { margin: 0; size: 58mm auto; } /* Format kertas printer kasir/thermal */
+                  body { 
+                      font-family: 'monospace', sans-serif; 
+                      margin: 0; 
+                      padding: 10px; 
+                      text-align: center; 
+                      color: #000; 
+                      background: #fff; 
+                      width: 58mm; 
+                      box-sizing: border-box; 
+                  }
+                  .title { font-size: 14px; font-weight: bold; margin-bottom: 5px; border-bottom: 1px dashed #000; padding-bottom: 5px; }
+                  .order-id { font-size: 26px; font-weight: 900; margin: 8px 0; letter-spacing: 1px;}
+                  .name { font-size: 15px; font-weight: bold; margin-bottom: 10px; word-wrap: break-word; text-transform: uppercase;}
+                  .meta { font-size: 10px; margin-bottom: 10px; font-weight: bold;}
+                  .qr-container { display: flex; justify-content: center; margin-top: 15px; margin-bottom: 15px; }
+                  .footer { font-size: 9px; border-top: 1px dashed #000; padding-top: 8px; font-weight: bold;}
+              </style>
+          </head>
+          <body>
+              <div class="title">SPAREPART APPROVAL</div>
+              <div class="meta">${order.waktu}</div>
+              
+              <div class="order-id">#${order.no_order}</div>
+              <div class="name">${order.nama}</div>
+              
+              <div class="meta">📦 ${order.filenames.length} File Cetak</div>
+              
+              <div class="qr-container" id="qrcode-label"></div>
+              
+              <div class="footer">Tempelkan pada map/amplop<br>pesanan pelanggan</div>
+              
+              <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>
+              <script>
+                  window.onload = function() {
+                      new QRCode(document.getElementById("qrcode-label"), {
+                          text: "LBL-${order.no_order}-${order.nama}",
+                          width: 110,
+                          height: 110,
+                          colorDark : "#000000",
+                          colorLight : "#ffffff",
+                          correctLevel : QRCode.CorrectLevel.M
+                      });
+                      setTimeout(() => { window.print(); window.close(); }, 600);
+                  };
+              <\/script>
+          </body>
+          </html>
+          `);
+          printWindow.document.close();
       }
 
       setInterval(loadData, 4000);
