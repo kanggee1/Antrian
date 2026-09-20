@@ -68,8 +68,15 @@
           <button onclick="switchTab('antrian')" id="tab-antrian" class="px-4 py-2 font-bold text-xs rounded-lg bg-blue-600 text-white transition shadow-md">📋 Antrian Aktif</button>
           <button onclick="switchTab('riwayat')" id="tab-riwayat" class="px-4 py-2 font-bold text-xs rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition">📜 Riwayat & Re-use</button>
         </div>
-        <div class="relative">
-          <input type="text" id="searchInput" oninput="filterTables()" placeholder="🔍 Cari Nama / No Order..." class="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:border-blue-500 w-full md:w-64" />
+        
+        <div class="flex items-center gap-2 w-full md:w-auto">
+          <!-- Tombol Hapus Semua Riwayat -->
+          <button onclick="hapusSemuaRiwayat()" id="btn-hapus-semua" class="hidden bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition shadow-md whitespace-nowrap">
+            🗑️ Hapus Semua Riwayat
+          </button>
+          <div class="relative w-full md:w-64">
+            <input type="text" id="searchInput" onkeyup="debounceSearch()" placeholder="🔍 Cari Nama / No Order..." class="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:border-blue-500 w-full" />
+          </div>
         </div>
       </div>
 
@@ -391,25 +398,29 @@
         }, 2500);
       }
 
+      // FITUR ENTERPRISE: Menampilkan tombol Hapus Semua hanya di tab Riwayat
       function switchTab(tabName) {
         activeTab = tabName;
         const btnAntrian = document.getElementById("tab-antrian");
         const btnRiwayat = document.getElementById("tab-riwayat");
         const contentAntrian = document.getElementById("content-antrian");
         const contentRiwayat = document.getElementById("content-riwayat");
+        const btnHapusSemua = document.getElementById("btn-hapus-semua");
 
         if (tabName === "antrian") {
           btnAntrian.className = "px-4 py-2 font-bold text-xs rounded-lg bg-blue-600 text-white transition shadow-md";
           btnRiwayat.className = "px-4 py-2 font-bold text-xs rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition";
           contentAntrian.classList.remove("hidden");
           contentRiwayat.classList.add("hidden");
+          btnHapusSemua.classList.add("hidden");
         } else {
           btnRiwayat.className = "px-4 py-2 font-bold text-xs rounded-lg bg-blue-600 text-white transition shadow-md";
           btnAntrian.className = "px-4 py-2 font-bold text-xs rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition";
           contentRiwayat.classList.remove("hidden");
           contentAntrian.classList.add("hidden");
+          btnHapusSemua.classList.remove("hidden");
         }
-        filterTables();
+        loadData();
       }
 
       function loadData() {
@@ -421,7 +432,8 @@
             renderQueue(data);
           });
 
-        fetch("/api/history")
+        let searchKey = document.getElementById("searchInput").value;
+        fetch(`/api/history?q=${searchKey}`)
           .then((res) => res.json())
           .then((data) => {
             globalHistoryData = data;
@@ -466,24 +478,46 @@
         });
       }
 
+      // FITUR ENTERPRISE: Grouping Riwayat Berdasarkan Tanggal
       function renderHistory(data) {
         const tbody = document.getElementById("history-body");
         tbody.innerHTML = "";
         if (data.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="5" class="px-4 py-8 text-center text-slate-400 italic">Belum ada riwayat.</td></tr>`;
-          return;
+            tbody.innerHTML = `<tr><td colspan="5" class="px-4 py-8 text-center text-slate-400 italic">Belum ada riwayat atau tidak ditemukan.</td></tr>`;
+            return;
         }
+
+        let currentDate = "";
+        
         data.forEach((item) => {
-          let badgeColor = item.status === "Selesai" ? "text-emerald-500 bg-emerald-500/10 border-emerald-500/20" : "text-slate-400 bg-slate-200 dark:bg-slate-700/50 border-slate-300 dark:border-slate-600";
-          tbody.innerHTML += `
+            let itemDate = item.waktu ? item.waktu.split(" ")[0] : "Tanggal Tidak Diketahui"; 
+            let itemTime = item.waktu ? item.waktu.split(" ")[1] : "";
+            
+            // Buat header tanggal
+            if (itemDate !== currentDate) {
+                currentDate = itemDate;
+                tbody.innerHTML += `
+                    <tr class="bg-indigo-50 dark:bg-indigo-900/20">
+                        <td colspan="5" class="px-4 py-2 text-[10px] font-black text-indigo-700 dark:text-indigo-400 uppercase tracking-widest border-b border-indigo-100 dark:border-indigo-800/50">
+                            📅 TANGGAL: ${currentDate}
+                        </td>
+                    </tr>
+                `;
+            }
+
+            let badgeColor = item.status === "Selesai" ? "text-emerald-500 bg-emerald-500/10 border-emerald-500/20" : "text-slate-400 bg-slate-200 dark:bg-slate-700/50 border-slate-300 dark:border-slate-600";
+            tbody.innerHTML += `
             <tr class="hover:bg-slate-100 dark:hover:bg-slate-700/30 transition border-b border-slate-200 dark:border-slate-700/40">
-                <td class="px-4 py-3 font-extrabold text-slate-700 dark:text-slate-300">${item.no_order}</td>
+                <td class="px-4 py-3 font-extrabold text-slate-700 dark:text-slate-300">
+                    ${item.no_order}<br>
+                    <span class="text-[9px] font-normal text-slate-400">${itemTime}</span>
+                </td>
                 <td class="px-4 py-3 font-bold text-slate-800 dark:text-slate-200">${item.nama}</td>
                 <td class="px-4 py-3">${generateFileHTML(item.filenames)}</td>
                 <td class="px-4 py-3"><span class="px-2 py-0.5 rounded-md text-[10px] font-bold border ${badgeColor}">${item.status}</span></td>
                 <td class="px-4 py-3 text-center">
                     <div class="flex items-center justify-center gap-1.5">
-                        <button onclick="updateStatus(${item.id}, 'Menunggu')" class="bg-blue-600/20 hover:bg-blue-600/40 text-blue-600 dark:text-blue-300 border border-blue-500/30 px-3 py-1.5 rounded-lg text-xs font-bold transition">🔄 Proses Ulang</button>
+                        <button onclick="updateStatus(${item.id}, 'Menunggu')" class="bg-blue-600/20 hover:bg-blue-600/40 text-blue-600 dark:text-blue-300 border border-blue-500/30 px-3 py-1.5 rounded-lg text-xs font-bold transition" title="Masukkan lagi ke Antrian">🔄 Re-use</button>
                         <button onclick="hapusRiwayat(${item.id})" class="bg-rose-600/20 hover:bg-rose-600/40 text-rose-600 dark:text-rose-300 border border-rose-500/30 px-3 py-1.5 rounded-lg text-xs font-bold transition">🗑️ Hapus</button>
                     </div>
                 </td>
@@ -491,13 +525,20 @@
         });
       }
 
-      function filterTables() {
-        let keyword = document.getElementById("searchInput").value.toLowerCase();
-        if (activeTab === "antrian") {
-          renderQueue(globalQueueData.filter((i) => i.nama.toLowerCase().includes(keyword) || i.no_order.toLowerCase().includes(keyword)));
-        } else {
-          renderHistory(globalHistoryData.filter((i) => i.nama.toLowerCase().includes(keyword) || i.no_order.toLowerCase().includes(keyword)));
-        }
+      // FITUR ENTERPRISE: Pencarian Anti-Lag (Debounce)
+      let searchTimeout;
+      function debounceSearch() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            let keyword = document.getElementById("searchInput").value.toLowerCase();
+            if (activeTab === "antrian") {
+                renderQueue(globalQueueData.filter((i) => i.nama.toLowerCase().includes(keyword) || i.no_order.toLowerCase().includes(keyword)));
+            } else {
+                fetch(`/api/history?q=${keyword}`)
+                    .then(res => res.json())
+                    .then(data => renderHistory(data));
+            }
+        }, 400); // Mencegah server nge-hang saat mengetik cepat
       }
 
       function updateStatus(id, status) {
@@ -526,9 +567,24 @@
         }
       }
 
+      // FITUR ENTERPRISE: Hapus Semua Riwayat 1 Klik
+      function hapusSemuaRiwayat() {
+        if (confirm("🚨 PERINGATAN! Anda yakin ingin menghapus SEMUA RIWAYAT dan FILE cetak usang secara permanen? Aksi ini tidak dapat dibatalkan dan akan membebaskan banyak penyimpanan server.")) {
+            fetch('/api/delete_all_history', { method: "DELETE" })
+                .then(res => res.json())
+                .then(res => {
+                    if (res.success) {
+                        showToast("🧹 " + res.message);
+                        loadData(); 
+                    }
+                });
+        }
+      }
+
       setInterval(loadData, 4000);
       loadData();
 
+      // ============== BAGIAN KODE EDITOR FABRIC JS (TIDAK BERUBAH) ==============
       function toggleGridLines(forceState) {
         let checked = forceState !== undefined ? forceState : document.getElementById("toggleGrid").checked;
         if (backgroundGridGroup) canvas.remove(backgroundGridGroup);
@@ -995,7 +1051,6 @@
       }
 
       function cetakLangsung() {
-        // Hapus garis bantu sebelum cetak
         if (bleedLineGroup) canvas.remove(bleedLineGroup);
         if (backgroundGridGroup) canvas.remove(backgroundGridGroup);
         const order = globalQueueData.find((q) => q.id === currentEditingId) || globalHistoryData.find((q) => q.id === currentEditingId);
@@ -1012,7 +1067,6 @@
           const qrDataUrl = qrCanvas ? qrCanvas.toDataURL() : "";
           const dataURL = canvas.toDataURL({ format: "png", quality: 1.0 });
 
-          // PERBAIKAN: CSS Khusus Cetak 1 Halaman Mulus
           const printWindow = window.open("", "_blank");
           printWindow.document.write(`
               <!DOCTYPE html>
@@ -1021,7 +1075,7 @@
                   <title>Print Receipt - ${orderNoText}</title>
                   <style>
                       @page { 
-                          size: A4 portrait; /* Paksa format A4 */
+                          size: A4 portrait; 
                           margin: 10mm; 
                       }
                       body { 
@@ -1030,10 +1084,10 @@
                       }
                       .print-container { 
                           width: 100%; 
-                          max-width: 190mm; /* Sesuaikan batas aman A4 */
+                          max-width: 190mm; 
                           margin: 0 auto; 
                           box-sizing: border-box; 
-                          page-break-inside: avoid; /* Larang pemecahan elemen */
+                          page-break-inside: avoid;
                           break-inside: avoid;
                       }
                       .minimal-header { 
@@ -1047,13 +1101,12 @@
                       
                       .print-body { text-align: center; width: 100%; }
                       
-                      /* INI KUNCI UTAMANYA AGAR GAMBAR TIDAK TURUN KE HALAMAN 2 */
                       .print-body img { 
                           max-width: 100%; 
-                          max-height: 245mm; /* Batasi tinggi maksimal agar pas 1 halaman dengan header */
+                          max-height: 245mm; 
                           width: auto;
                           height: auto;
-                          object-fit: contain; /* Jaga proporsi agar tidak gepeng */
+                          object-fit: contain; 
                           display: block; 
                           margin: 0 auto;
                           page-break-inside: avoid;
