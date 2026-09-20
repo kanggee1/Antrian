@@ -1,13 +1,14 @@
 import os
 import time
 import json
+from datetime import datetime
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for, send_from_directory
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 app.secret_key = 'kunci_rahasia_admin_percetakan'
 
-# PERBAIKAN: Gunakan jalur absolut agar hosting tidak salah tempat menyimpan foto/database
+# Gunakan jalur absolut agar hosting tidak salah tempat menyimpan foto/database
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 UPLOAD_FOLDER = os.path.join(BASE_DIR, 'static', 'uploads')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -115,10 +116,21 @@ def get_queue():
     menunggu = [q for q in db_antrian if q['status'] == 'Menunggu']
     return jsonify(menunggu)
 
+# API UNTUK RIWAYAT DENGAN PENCARIAN ANTI-LAG
 @app.route('/api/history')
 def get_history():
     db_antrian, _ = load_db()
+    search_query = request.args.get('q', '').lower()
+    
+    # Filter status riwayat
     riwayat = [q for q in db_antrian if q['status'] in ['Selesai', 'Dilewati']]
+    
+    # Pencarian cepat via Backend
+    if search_query:
+        riwayat = [q for q in riwayat if search_query in q['nama'].lower() or search_query in q['no_order'].lower()]
+    
+    # Urutkan dari yang terbaru berdasarkan waktu
+    riwayat.sort(key=lambda x: x.get('waktu', ''), reverse=True)
     return jsonify(riwayat)
 
 @app.route('/api/update_status/<int:order_id>', methods=['POST'])
@@ -165,6 +177,27 @@ def delete_order(order_id):
         return jsonify({"success": True, "message": "Riwayat dan file berhasil dihapus secara permanen"})
         
     return jsonify({"success": False, "message": "Data tidak ditemukan"}), 404
+
+# API UNTUK HAPUS SEMUA RIWAYAT (1-KLIK)
+@app.route('/api/delete_all_history', methods=['DELETE'])
+def delete_all_history():
+    db_antrian, current_id = load_db()
+    
+    antrian_aktif = [q for q in db_antrian if q['status'] == 'Menunggu']
+    antrian_selesai = [q for q in db_antrian if q['status'] in ['Selesai', 'Dilewati']]
+    
+    # Hapus file fisik dari server
+    for order in antrian_selesai:
+        for filename in order.get('filenames', []):
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            if os.path.exists(file_path):
+                try:
+                    os.remove(file_path)
+                except Exception:
+                    pass
+                    
+    save_db(antrian_aktif, current_id)
+    return jsonify({"success": True, "message": "Semua riwayat dan file usang berhasil dibersihkan dari server."})
 
 @app.route('/download/<filename>')
 def download_file(filename):
