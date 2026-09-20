@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Kirim File Cetak - Studio Percetakan</title>
+    <title>Kirim File dan Approval</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = { darkMode: 'class' }
@@ -25,13 +25,13 @@
         <!-- Header -->
         <div class="mb-8 text-center md:text-left">
           <span class="inline-block text-[10px] font-mono font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20 px-3 py-1 rounded-full mb-3">
-            Self-Service Drop
+            Approval
           </span>
           <h1 class="text-2xl font-black text-slate-800 dark:text-white tracking-tight">
-            Form Antrian Cetak
+            Form Approval Sparepart
           </h1>
           <p class="text-slate-500 dark:text-slate-400 text-xs mt-1.5 font-medium">
-            Lengkapi data dan unggah dokumen Anda.
+            Lengkapi data dan unggah dokumen Anda, Pastikan sudah Approve dari MANAGER.
           </p>
         </div>
 
@@ -74,7 +74,7 @@
 
           <button type="submit" id="submitBtn" 
             class="w-full bg-indigo-600 hover:bg-indigo-700 active:scale-[0.99] text-white font-bold py-3.5 px-4 rounded-xl shadow-lg shadow-indigo-600/20 transition duration-200 text-sm mt-4 flex items-center justify-center gap-2">
-            <span>Kirim ke Antrian Studio</span>
+            <span>Kirim</span>
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
           </button>
         </form>
