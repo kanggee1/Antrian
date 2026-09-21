@@ -59,7 +59,7 @@
         </div>
       </div>
 
-      <!-- PEMBARUAN: Stat Cards (Ditambah Storage Server) -->
+      <!-- Stat Cards -->
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 flex items-center justify-between shadow-sm">
           <div>
@@ -82,7 +82,7 @@
           </div>
           <div class="bg-blue-500/10 p-3 rounded-xl text-blue-500 text-xl font-bold hidden md:block">📊</div>
         </div>
-        <!-- FITUR BARU: Storage Monitor -->
+        <!-- Storage Monitor -->
         <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 flex items-center justify-between shadow-sm relative overflow-hidden">
           <div class="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 to-purple-600"></div>
           <div>
@@ -564,9 +564,9 @@
                 <td class="px-4 py-3 text-center">
                     <div class="flex items-center justify-center gap-1.5 flex-wrap">
                         ${btnVip}
-                        <!-- FITUR BARU: Tombol Cetak Stiker Thermal -->
                         <button onclick="cetakLabelThermal(${item.id})" class="bg-slate-700 hover:bg-slate-800 text-white dark:bg-slate-600 dark:hover:bg-slate-500 px-2.5 py-1.5 rounded-lg text-xs font-bold transition" title="Cetak Stiker Map/Order">🏷️ Label</button>
                         <button onclick="bukaEditor(${item.id})" class="bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-600 dark:text-indigo-300 border border-indigo-500/30 px-2.5 py-1.5 rounded-lg text-xs font-bold transition">🎨 Studio</button>
+                        <button onclick="updateStatus(${item.id}, 'Dilewati')" class="bg-rose-50 dark:bg-rose-900/20 hover:bg-rose-100 dark:hover:bg-rose-900/40 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-700/50 px-2.5 py-1.5 rounded-lg text-xs font-bold transition" title="Lewati pesanan ini">⏭️ Lewati</button>
                         <button onclick="updateStatus(${item.id}, 'Selesai')" class="bg-emerald-600 hover:bg-emerald-500 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition shadow-sm">✅ Selesai</button>
                     </div>
                 </td>
@@ -829,7 +829,7 @@
       setInterval(loadData, 4000);
       loadData();
 
-      // ============== BAGIAN KODE EDITOR FABRIC JS (TIDAK BERUBAH) ==============
+      // ============== BAGIAN KODE EDITOR FABRIC JS ==============
       function toggleGridLines(forceState) {
         let checked = forceState !== undefined ? forceState : document.getElementById("toggleGrid").checked;
         if (backgroundGridGroup) canvas.remove(backgroundGridGroup);
